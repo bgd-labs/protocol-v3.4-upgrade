@@ -7,7 +7,7 @@ import {DataTypes} from "aave-v3-origin/contracts/protocol/pool/Pool.sol";
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {IReserveInterestRateStrategy} from "aave-v3-origin/contracts/interfaces/IReserveInterestRateStrategy.sol";
 import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
-
+import {CustomInitialize} from "./CustomInitialize.sol";
 /**
  * @notice Pool instance
  *
@@ -15,6 +15,7 @@ import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
  * - bumped revision
  * - custom initialize
  */
+
 contract PoolInstanceProtoProto3_4 is PoolInstance {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -23,9 +24,10 @@ contract PoolInstanceProtoProto3_4 is PoolInstance {
   {}
 
   function initialize(IPoolAddressesProvider provider) external virtual override initializer {
-    require(provider == ADDRESSES_PROVIDER, Errors.INVALID_ADDRESSES_PROVIDER);
+    require(provider == ADDRESSES_PROVIDER, Errors.InvalidAddressesProvider());
     DataTypes.ReserveData storage currentGHOConfig = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING];
     currentGHOConfig.configuration.setVirtualAccActive();
+    CustomInitialize._initialize(_reservesCount, _reservesList, _reserves);
   }
 
   // TODO: remove, bump should be on original repo

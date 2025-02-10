@@ -34,7 +34,7 @@ contract VariableDebtTokenInstanceGHO is VariableDebtToken {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
+    require(initializingPool == POOL, Errors.PoolAddressesDoNotMatch());
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
