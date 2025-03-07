@@ -62,7 +62,9 @@ contract UpgradePayload {
     // 1. Upgrade pool and configurator implementations
     // to be able to use v3.4 interfaces for the pool and configurator
     POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
-    POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
+    if (_needToUpgradePoolConfiguratorImpl()) {
+      POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
+    }
 
     // 2. Set a new pool data provider
     POOL_ADDRESSES_PROVIDER.setPoolDataProvider(POOL_DATA_PROVIDER);
@@ -116,6 +118,10 @@ contract UpgradePayload {
   }
 
   function _needToUpdateReserve(address) internal view virtual returns (bool) {
+    return true;
+  }
+
+  function _needToUpgradePoolConfiguratorImpl() internal pure virtual returns (bool) {
     return true;
   }
 }
@@ -234,10 +240,16 @@ contract UpgradePayloadMainnet is UpgradePayload {
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
-    if (reserve == AaveV3EthereumAssets.GHO_UNDERLYING) {
+    // TODO: need to figure out what we are going to do with Aave Ethereum AAVE (aEthAAVE) token in the Mainnet Core Pool
+    // it has a different implementation than the other aTokens (the vToken is the same).
+    if (reserve == AaveV3EthereumAssets.GHO_UNDERLYING || reserve == 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9) {
       return false;
     }
 
     return true;
+  }
+
+  function _needToUpgradePoolConfiguratorImpl() internal pure virtual override returns (bool) {
+    return false;
   }
 }
