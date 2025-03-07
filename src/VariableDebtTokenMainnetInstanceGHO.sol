@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
-import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
+import {
+  VariableDebtToken,
+  IPool,
+  IInitializableDebtToken,
+  VersionedInitializable,
+  Errors
+} from "aave-v3-origin/contracts/protocol/tokenization/VariableDebtToken.sol";
 
 import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTokenMainnetInstanceGHO.sol";
 
-contract VariableDebtTokenMainnetInstanceGHO is VariableDebtTokenInstance, IVariableDebtTokenMainnetInstanceGHO {
+contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebtTokenMainnetInstanceGHO {
+  uint256 public constant DEBT_TOKEN_REVISION = 4;
+
   // These are additional variables that were in the v3.3 VToken for the GHO aToken
   // but there is no such variables in all other vTokens in both v3.3 and v3.4
   // so we need to clean them in case in future versions of vTokens it will be
@@ -22,7 +29,41 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtTokenInstance, IVari
   // On this slot there can be only value types, not reference types.
   // mapping(address => GhoUserState) internal _deprecated_ghoUserState;
 
-  constructor(IPool pool, address rewardsController) VariableDebtTokenInstance(pool, rewardsController) {}
+  constructor(IPool pool, address rewardsController) VariableDebtToken(pool, rewardsController) {}
+
+  /// @inheritdoc VersionedInitializable
+  function getRevision() internal pure virtual override returns (uint256) {
+    return DEBT_TOKEN_REVISION;
+  }
+
+  /// @inheritdoc IInitializableDebtToken
+  function initialize(
+    IPool initializingPool,
+    address underlyingAsset,
+    uint8 debtTokenDecimals,
+    string memory debtTokenName,
+    string memory debtTokenSymbol,
+    bytes calldata params
+  ) external override initializer {
+    require(initializingPool == POOL, Errors.PoolAddressesDoNotMatch());
+    _setName(debtTokenName);
+    _setSymbol(debtTokenSymbol);
+    _setDecimals(debtTokenDecimals);
+
+    _underlyingAsset = underlyingAsset;
+
+    _domainSeparator = _calculateDomainSeparator();
+
+    emit Initialized(
+      underlyingAsset,
+      address(POOL),
+      address(REWARDS_CONTROLLER),
+      debtTokenDecimals,
+      debtTokenName,
+      debtTokenSymbol,
+      params
+    );
+  }
 
   /// @inheritdoc IVariableDebtTokenMainnetInstanceGHO
   function migrateToV3_4() external override onlyPoolAdmin {
