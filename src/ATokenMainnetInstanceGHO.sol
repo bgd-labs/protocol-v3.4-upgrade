@@ -2,12 +2,11 @@
 pragma solidity ^0.8.0;
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
+import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 
 import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 
 import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
-
-import {ATokenInstance} from "./ATokenInstance.sol";
 
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
 

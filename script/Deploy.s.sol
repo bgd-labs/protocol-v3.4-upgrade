@@ -19,6 +19,12 @@ import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 
 import {AaveProtocolDataProvider} from "aave-v3-origin/contracts/helpers/AaveProtocolDataProvider.sol";
 
+import {PoolConfiguratorInstance} from "aave-v3-origin/contracts/instances/PoolConfiguratorInstance.sol";
+import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
+import {L2PoolInstance} from "aave-v3-origin/contracts/instances/L2PoolInstance.sol";
+import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
+import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
+
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 import {IReserveInterestRateStrategy} from "aave-v3-origin/contracts/interfaces/IReserveInterestRateStrategy.sol";
@@ -46,11 +52,6 @@ import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {UpgradePayload, UpgradePayloadMainnet} from "../src/UpgradePayload.sol";
 import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
-import {PoolConfiguratorInstance} from "../src/PoolConfiguratorInstance.sol";
-import {PoolInstance} from "../src/PoolInstance.sol";
-import {L2PoolInstance} from "../src/L2PoolInstance.sol";
-import {ATokenInstance} from "../src/ATokenInstance.sol";
-import {VariableDebtTokenInstance} from "../src/VariableDebtTokenInstance.sol";
 
 import {ITransparentProxyFactory} from
   "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
