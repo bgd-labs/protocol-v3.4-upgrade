@@ -12,13 +12,9 @@ solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/so
 gho-direct-minter/=lib/GhoDirectMinter/src/
 
 lib/aave-helpers/:aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/
-lib/aave-helpers/:aave-v3-origin/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/src/
-lib/aave-helpers/:aave-v3-origin-tests/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/tests
-lib/aave-helpers/:forge-std/=lib/aave-helpers/lib/forge-std/src/
 lib/aave-helpers/:solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/src/
 
 lib/aave-v3-origin-private/:solidity-utils/=lib/aave-v3-origin-private/lib/solidity-utils/src/
-lib/aave-v3-origin-private/:forge-std/=lib/aave-v3-origin-private/lib/forge-std/src/
 lib/aave-v3-origin-private/:ds-test/=lib/aave-v3-origin-private/lib/forge-std/lib/ds-test/src/
 lib/aave-v3-origin-private/:openzeppelin-contracts-upgradeable/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/
 lib/aave-v3-origin-private/:openzeppelin-contracts/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/
@@ -26,8 +22,6 @@ lib/aave-v3-origin-private/:openzeppelin-contracts/=lib/aave-v3-origin-private/l
 
 lib/GhoDirectMinter/:aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/
 lib/GhoDirectMinter/:aave-helpers/=lib/aave-helpers/
-lib/GhoDirectMinter/:aave-v3-origin-tests/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/tests/
-lib/GhoDirectMinter/:aave-v3-origin/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/src
 lib/GhoDirectMinter/:ds-test/=lib/aave-helpers/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/
 lib/GhoDirectMinter/:erc4626-tests/=lib/aave-helpers/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/
 lib/GhoDirectMinter/:forge-std/=lib/GhoDirectMinter/lib/forge-std/src/
