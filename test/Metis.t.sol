@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract MetisTest is UpgradeTest("metis", 19863088) {
+contract MetisTest is UpgradeTest("metis", 19964710) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployMetis();
   }

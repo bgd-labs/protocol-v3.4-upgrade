@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract PolygonTest is UpgradeTest("polygon", 68758964) {
+contract PolygonTest is UpgradeTest("polygon", 69285284) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployPolygon();
   }

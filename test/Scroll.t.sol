@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract ScrollTest is UpgradeTest("scroll", 13887215) {
+contract ScrollTest is UpgradeTest("scroll", 14131853) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployScroll();
   }
