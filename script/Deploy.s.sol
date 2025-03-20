@@ -20,10 +20,9 @@ import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 import {AaveProtocolDataProvider} from "aave-v3-origin/contracts/helpers/AaveProtocolDataProvider.sol";
 
 import {PoolConfiguratorInstance} from "aave-v3-origin/contracts/instances/PoolConfiguratorInstance.sol";
-import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
-import {L2PoolInstance} from "aave-v3-origin/contracts/instances/L2PoolInstance.sol";
 import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
+import {ATokenWithDelegationInstance} from "aave-v3-origin/contracts/instances/ATokenWithDelegationInstance.sol";
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
@@ -52,6 +51,8 @@ import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {UpgradePayload, UpgradePayloadMainnet} from "../src/UpgradePayload.sol";
 import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
+import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
+import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCustomInitialize.sol";
 
 import {ITransparentProxyFactory} from
   "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
@@ -228,7 +229,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(L2PoolInstance).creationCode,
+      type(L2PoolInstanceWithCustomInitialize).creationCode,
       abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
@@ -240,7 +241,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(PoolInstance).creationCode, abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
+      type(PoolInstanceWithCustomInitialize).creationCode, abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
     return _deployPayload(deployParams, payloadParams, isMainnetCore);
@@ -300,6 +301,12 @@ library DeploymentLibrary {
       IPool(address(AaveV3Ethereum.POOL)), AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER
     );
 
+    ATokenWithDelegationInstance aTokenWithDelegationImpl = new ATokenWithDelegationInstance(
+      IPool(address(AaveV3Ethereum.POOL)),
+      AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER,
+      address(AaveV3Ethereum.COLLECTOR)
+    );
+
     return address(
       new UpgradePayloadMainnet(
         UpgradePayloadMainnet.ConstructorMainnetParams({
@@ -311,6 +318,7 @@ library DeploymentLibrary {
           vTokenImpl: params.vTokenImpl,
           aTokenGhoImpl: address(aTokenImplGho),
           vTokenGhoImpl: address(vTokenImplGho),
+          aTokenWithDelegationImpl: address(aTokenWithDelegationImpl),
           ghoFacilitator: ghoFacilitator
         })
       )
