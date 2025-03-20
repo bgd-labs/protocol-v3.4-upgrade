@@ -8,7 +8,7 @@ import {
   IPoolDataProvider,
   IPoolAddressesProvider,
   IERC20
-} from "aave-helpers/src/ProtocolV3TestBase.sol";
+} from "../src/aave-helpers/ProtocolV3TestBase.sol";
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 

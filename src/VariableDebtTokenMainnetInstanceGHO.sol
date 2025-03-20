@@ -20,9 +20,9 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebt
   // needed to add new storage variables.
   // If we don't clean them, then the aToken for the GHO token will have non zero values
   // in these new variables that may be added in the future.
-  address internal _deprecated_ghoAToken;
-  address internal _deprecated_discountToken;
-  address internal _deprecated_discountRateStrategy;
+  address private _deprecated_ghoAToken;
+  address private _deprecated_discountToken;
+  address private _deprecated_discountRateStrategy;
 
   // This global variable can't be cleaned. The future vToken code upgrades should consider
   // that on this slot there can't be a new mapping because it holds some non-zero values

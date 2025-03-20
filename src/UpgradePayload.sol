@@ -141,11 +141,14 @@ contract UpgradePayloadMainnet is UpgradePayload {
     address vTokenImpl;
     address aTokenGhoImpl;
     address vTokenGhoImpl;
+    address aTokenWithDelegationImpl;
     address ghoFacilitator;
   }
 
   address public immutable A_TOKEN_GHO_IMPL;
   address public immutable V_TOKEN_GHO_IMPL;
+
+  address public immutable A_TOKEN_WITH_DELEGATION_IMPL;
 
   address public immutable FACILITATOR;
 
@@ -163,6 +166,8 @@ contract UpgradePayloadMainnet is UpgradePayload {
   {
     A_TOKEN_GHO_IMPL = params.aTokenGhoImpl;
     V_TOKEN_GHO_IMPL = params.vTokenGhoImpl;
+
+    A_TOKEN_WITH_DELEGATION_IMPL = params.aTokenWithDelegationImpl;
 
     FACILITATOR = params.ghoFacilitator;
   }
@@ -235,14 +240,34 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     );
 
-    // 13. Migrate the vToken of the GHO token to the new version
+    // 13. Upgrade the aToken of the AAVE token to the new version
+    POOL_CONFIGURATOR.updateAToken(
+      ConfiguratorInputTypes.UpdateATokenInput({
+        asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
+        name: "Aave Ethereum AAVE",
+        symbol: "aEthAAVE",
+        implementation: A_TOKEN_WITH_DELEGATION_IMPL,
+        params: ""
+      })
+    );
+
+    // 14. Upgrade the vToken of the AAVE token to the new version
+    POOL_CONFIGURATOR.updateVariableDebtToken(
+      ConfiguratorInputTypes.UpdateDebtTokenInput({
+        asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
+        name: "Aave Ethereum Variable Debt AAVE",
+        symbol: "variableDebtEthAAVE",
+        implementation: V_TOKEN_IMPL,
+        params: ""
+      })
+    );
+
+    // 15. Migrate the vToken of the GHO token to the new version
     IVariableDebtTokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_V_TOKEN).migrateToV3_4();
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
-    // TODO: need to figure out what we are going to do with Aave Ethereum AAVE (aEthAAVE) token in the Mainnet Core Pool
-    // it has a different implementation than the other aTokens (the vToken is the same).
-    if (reserve == AaveV3EthereumAssets.GHO_UNDERLYING || reserve == 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9) {
+    if (reserve == AaveV3EthereumAssets.GHO_UNDERLYING || reserve == AaveV3EthereumAssets.AAVE_UNDERLYING) {
       return false;
     }
 
