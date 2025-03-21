@@ -180,14 +180,12 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
     vm.stopPrank();
 
     _deposit(collateralConfig, pool, collateralSupplier, collateralAssetAmount);
-    if (testAssetConfig.underlying != AaveV3EthereumAssets.GHO_UNDERLYING) {
-      _deposit(testAssetConfig, pool, testAssetSupplier, testAssetAmount);
-    }
+    _deposit(testAssetConfig, pool, testAssetSupplier, testAssetAmount);
 
     uint256 snapshotAfterDeposits = vm.snapshotState();
 
     // test deposits and withdrawals
-    if (testAssetConfig.underlying != AaveV3EthereumAssets.GHO_UNDERLYING) {
+    {
       uint256 aTokenTotalSupply = IERC20(testAssetConfig.aToken).totalSupply();
       uint256 variableDebtTokenTotalSupply = IERC20(testAssetConfig.variableDebtToken).totalSupply();
 
@@ -242,22 +240,11 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
         withATokens: false
       });
 
-      if (testAssetConfig.underlying != AaveV3EthereumAssets.GHO_UNDERLYING) {
-        vm.revertToState(snapshotBeforeRepay);
+      vm.revertToState(snapshotBeforeRepay);
 
-        _repay({
-          config: testAssetConfig,
-          pool: pool,
-          user: collateralSupplier,
-          amount: testAssetAmount,
-          withATokens: true
-        });
-      }
+      _repay({config: testAssetConfig, pool: pool, user: collateralSupplier, amount: testAssetAmount, withATokens: true});
 
-      vm.revertToState(snapshotAfterDeposits);
-
-      // test liquidations
-      _borrow({config: testAssetConfig, pool: pool, user: collateralSupplier, amount: testAssetAmount});
+      vm.revertToState(snapshotBeforeRepay);
 
       if (testAssetConfig.underlying != collateralConfig.underlying) {
         _changeAssetPrice(pool, testAssetConfig, 1000_00); // price increases to 1'000%

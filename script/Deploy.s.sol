@@ -241,7 +241,8 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(PoolInstanceWithCustomInitialize).creationCode, abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
+      type(PoolInstanceWithCustomInitialize).creationCode,
+      abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
     return _deployPayload(deployParams, payloadParams, isMainnetCore);
