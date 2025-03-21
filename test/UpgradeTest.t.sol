@@ -40,6 +40,26 @@ abstract contract UpgradeTest is ProtocolV3TestBase {
     );
   }
 
+  function test_upgrade() public virtual {
+    UpgradePayload _payload = UpgradePayload(_getTestPayload());
+
+    executePayload(vm, address(_payload));
+
+    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
+    IPool pool = IPool(addressesProvider.getPool());
+    IPoolDataProvider poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
+
+    address[] memory reserves = pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      address reserve = reserves[i];
+      assertTrue(poolDataProvider.getIsVirtualAccActive(reserve));
+
+      address aToken = pool.getReserveAToken(reserve);
+
+      assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
+    }
+  }
+
   function _getTestPayload() internal returns (address) {
     address deployed = _getDeployedPayload();
     if (deployed == address(0)) return _getPayload();
