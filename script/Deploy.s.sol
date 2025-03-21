@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import "forge-std/console.sol";
+
 import {
   EthereumScript,
   PolygonScript,
@@ -45,17 +47,11 @@ import {AaveV3EthereumLido, AaveV3EthereumLidoAssets} from "aave-address-book/Aa
 import {AaveV3EthereumEtherFi, AaveV3EthereumEtherFiAssets} from "aave-address-book/AaveV3EthereumEtherFi.sol";
 import {AaveV3Linea, AaveV3LineaAssets} from "aave-address-book/AaveV3Linea.sol";
 
-import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
-import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
-
 import {UpgradePayload, UpgradePayloadMainnet} from "../src/UpgradePayload.sol";
 import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
 import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCustomInitialize.sol";
-
-import {ITransparentProxyFactory} from
-  "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
 
 library DeploymentLibrary {
   // rollups
@@ -271,45 +267,41 @@ library DeploymentLibrary {
     if (isMainnetCore) {
       return _deployMainnet(payloadParams);
     } else {
-      return address(new UpgradePayload(payloadParams));
+      return GovV3Helpers.deployDeterministic(type(UpgradePayload).creationCode, abi.encode(payloadParams));
     }
   }
 
-  function _deployMainnet(UpgradePayload.ConstructorParams memory params) internal returns (address) {
+  function _deployMainnet(UpgradePayload.ConstructorParams memory params) private returns (address) {
     // its the council used on other GHO stewards
     // might make sense to have on address book
     address council = 0x8513e6F37dBc52De87b166980Fa3F50639694B60;
 
     // Deploy a new GHO facilitator for the proto pool
-    address ghoFacilitatorImpl = address(
-      new GhoDirectMinter(
-        AaveV3Ethereum.POOL_ADDRESSES_PROVIDER, address(AaveV3Ethereum.COLLECTOR), AaveV3EthereumAssets.GHO_UNDERLYING
-      )
-    );
-    address ghoFacilitator = ITransparentProxyFactory(MiscEthereum.TRANSPARENT_PROXY_FACTORY).create(
-      ghoFacilitatorImpl,
-      MiscEthereum.PROXY_ADMIN,
-      abi.encodeWithSelector(GhoDirectMinter.initialize.selector, GovernanceV3Ethereum.EXECUTOR_LVL_1, council)
+    address ghoFacilitatorImpl = GovV3Helpers.deployDeterministic(
+      type(GhoDirectMinter).creationCode,
+      abi.encode(AaveV3Ethereum.POOL_ADDRESSES_PROVIDER, AaveV3Ethereum.COLLECTOR, AaveV3EthereumAssets.GHO_UNDERLYING)
     );
 
-    ATokenMainnetInstanceGHO aTokenImplGho = new ATokenMainnetInstanceGHO(
-      IPool(address(AaveV3Ethereum.POOL)),
-      AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER,
-      address(AaveV3Ethereum.COLLECTOR)
+    address aTokenImplGho = GovV3Helpers.deployDeterministic(
+      type(ATokenMainnetInstanceGHO).creationCode,
+      abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER, AaveV3Ethereum.COLLECTOR)
     );
 
-    VariableDebtTokenMainnetInstanceGHO vTokenImplGho = new VariableDebtTokenMainnetInstanceGHO(
-      IPool(address(AaveV3Ethereum.POOL)), AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER
+    address vTokenImplGho = GovV3Helpers.deployDeterministic(
+      type(VariableDebtTokenMainnetInstanceGHO).creationCode,
+      abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER)
     );
 
-    ATokenWithDelegationInstance aTokenWithDelegationImpl = new ATokenWithDelegationInstance(
-      IPool(address(AaveV3Ethereum.POOL)),
-      AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER,
-      address(AaveV3Ethereum.COLLECTOR)
+    address aTokenWithDelegationImpl = GovV3Helpers.deployDeterministic(
+      type(ATokenWithDelegationInstance).creationCode,
+      abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER, AaveV3Ethereum.COLLECTOR)
     );
 
-    return address(
-      new UpgradePayloadMainnet(
+    console.log("Deploying UpgradePayloadMainnet...");
+
+    return GovV3Helpers.deployDeterministic(
+      type(UpgradePayloadMainnet).creationCode,
+      abi.encode(
         UpgradePayloadMainnet.ConstructorMainnetParams({
           poolAddressesProvider: IPoolAddressesProvider(address(AaveV3Ethereum.POOL_ADDRESSES_PROVIDER)),
           poolDataProvider: params.poolDataProvider,
@@ -317,10 +309,11 @@ library DeploymentLibrary {
           poolConfiguratorImpl: params.poolConfiguratorImpl,
           aTokenImpl: params.aTokenImpl,
           vTokenImpl: params.vTokenImpl,
-          aTokenGhoImpl: address(aTokenImplGho),
-          vTokenGhoImpl: address(vTokenImplGho),
-          aTokenWithDelegationImpl: address(aTokenWithDelegationImpl),
-          ghoFacilitator: ghoFacilitator
+          aTokenGhoImpl: aTokenImplGho,
+          vTokenGhoImpl: vTokenImplGho,
+          aTokenWithDelegationImpl: aTokenWithDelegationImpl,
+          ghoFacilitatorImpl: ghoFacilitatorImpl,
+          council: council
         })
       )
     );

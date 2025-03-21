@@ -4,6 +4,9 @@ pragma solidity ^0.8.10;
 import {IAccessControl} from "openzeppelin-contracts/contracts/access/IAccessControl.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import {ITransparentProxyFactory} from
+  "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
+
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolConfigurator} from "aave-v3-origin/contracts/interfaces/IPoolConfigurator.sol";
 import {IAToken} from "aave-v3-origin/contracts/interfaces/IAToken.sol";
@@ -12,8 +15,10 @@ import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/librarie
 
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
+import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 
 import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
+import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
 import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
@@ -142,7 +147,8 @@ contract UpgradePayloadMainnet is UpgradePayload {
     address aTokenGhoImpl;
     address vTokenGhoImpl;
     address aTokenWithDelegationImpl;
-    address ghoFacilitator;
+    address ghoFacilitatorImpl;
+    address council;
   }
 
   address public immutable A_TOKEN_GHO_IMPL;
@@ -169,7 +175,11 @@ contract UpgradePayloadMainnet is UpgradePayload {
 
     A_TOKEN_WITH_DELEGATION_IMPL = params.aTokenWithDelegationImpl;
 
-    FACILITATOR = params.ghoFacilitator;
+    FACILITATOR = ITransparentProxyFactory(MiscEthereum.TRANSPARENT_PROXY_FACTORY).create(
+      params.ghoFacilitatorImpl,
+      MiscEthereum.PROXY_ADMIN,
+      abi.encodeWithSelector(GhoDirectMinter.initialize.selector, GovernanceV3Ethereum.EXECUTOR_LVL_1, params.council)
+    );
   }
 
   function execute() public override {
