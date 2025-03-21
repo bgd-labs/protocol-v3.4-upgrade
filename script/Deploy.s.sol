@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
 import {
   EthereumScript,
   PolygonScript,
@@ -296,8 +294,6 @@ library DeploymentLibrary {
       type(ATokenWithDelegationInstance).creationCode,
       abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER, AaveV3Ethereum.COLLECTOR)
     );
-
-    console.log("Deploying UpgradePayloadMainnet...");
 
     return GovV3Helpers.deployDeterministic(
       type(UpgradePayloadMainnet).creationCode,
