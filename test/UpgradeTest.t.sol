@@ -49,6 +49,8 @@ abstract contract UpgradeTest is ProtocolV3TestBase {
     IPool pool = IPool(addressesProvider.getPool());
     IPoolDataProvider poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
 
+    assertEq(pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(), 100_00);
+
     address[] memory reserves = pool.getReservesList();
     for (uint256 i = 0; i < reserves.length; i++) {
       address reserve = reserves[i];
