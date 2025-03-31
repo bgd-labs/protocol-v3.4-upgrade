@@ -19,6 +19,7 @@ import {DataTypes} from "aave-v3-origin/contracts/protocol/libraries/types/DataT
 import {MockAggregator} from "aave-v3-origin/contracts/mocks/oracle/CLAggregators/MockAggregator.sol";
 import {IDefaultInterestRateStrategyV2} from "aave-v3-origin/contracts/interfaces/IDefaultInterestRateStrategyV2.sol";
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
+import {IAToken} from "aave-v3-origin/contracts/interfaces/IAToken.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 
 import {DiffUtils} from "aave-v3-origin-tests/utils/DiffUtils.sol";
@@ -494,6 +495,22 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
     vm.stopPrank();
   }
 
+  struct FlashLoanVars {
+    address treasury;
+    uint256 underlyingTokenBalanceOfATokenBefore;
+    uint256 debtTokenBalanceOfUserBefore;
+    uint256 underlyingTokenBalanceOfTreasuryBefore;
+    uint256 flashLoanPremiumTotal;
+    uint256 flashLoanPremiumToAToken;
+    uint256 flashLoanPremiumToProtocol;
+    uint256 underlyingTokenBalanceOfATokenAfter;
+    uint256 debtTokenBalanceOfUserAfter;
+    uint256 underlyingTokenBalanceOfTreasuryAfter;
+    uint256[] interestRateModes;
+    uint256[] amounts;
+    address[] assets;
+  }
+
   function _flashLoan(
     ReserveConfig memory config,
     IPool pool,
@@ -502,56 +519,63 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
     uint256 amount,
     uint256 interestRateMode
   ) internal {
+    FlashLoanVars memory vars;
+
     vm.startPrank(user);
 
-    uint256 underlyingTokenBalanceOfATokenBefore = IERC20(config.underlying).balanceOf(config.aToken);
-    uint256 debtTokenBalanceOfUserBefore = IERC20(config.variableDebtToken).balanceOf(user);
+    vars.treasury = IAToken(config.aToken).RESERVE_TREASURY_ADDRESS();
 
-    uint256 totalPremium;
+    vars.underlyingTokenBalanceOfATokenBefore = IERC20(config.underlying).balanceOf(config.aToken);
+    vars.debtTokenBalanceOfUserBefore = IERC20(config.variableDebtToken).balanceOf(user);
+    vars.underlyingTokenBalanceOfTreasuryBefore = IERC20(config.underlying).balanceOf(vars.treasury);
+
     if (interestRateMode == 0) {
-      uint256 flashLoanPremiumTotal = pool.FLASHLOAN_PREMIUM_TOTAL();
+      vars.flashLoanPremiumTotal = pool.FLASHLOAN_PREMIUM_TOTAL();
+      vars.flashLoanPremiumToProtocol = pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
 
-      totalPremium = amount.percentMul(flashLoanPremiumTotal);
+      vars.flashLoanPremiumTotal = amount.percentMul(vars.flashLoanPremiumTotal);
+      vars.flashLoanPremiumToProtocol = vars.flashLoanPremiumTotal.percentMul(vars.flashLoanPremiumToProtocol);
+      vars.flashLoanPremiumToAToken = vars.flashLoanPremiumTotal - vars.flashLoanPremiumToProtocol;
 
-      deal2(config.underlying, receiverAddress, totalPremium);
+      deal2(config.underlying, receiverAddress, vars.flashLoanPremiumTotal);
     }
 
     console.log("FLASH LOAN: %s, Amount: %s", config.symbol, amount);
 
-    {
-      address[] memory assets = new address[](1);
-      assets[0] = config.underlying;
+      vars.assets = new address[](1);
+      vars.assets[0] = config.underlying;
 
-      uint256[] memory amounts = new uint256[](1);
-      amounts[0] = amount;
+      vars.amounts = new uint256[](1);
+      vars.amounts[0] = amount;
 
-      uint256[] memory interestRateModes = new uint256[](1);
-      interestRateModes[0] = interestRateMode;
+      vars.interestRateModes = new uint256[](1);
+      vars.interestRateModes[0] = interestRateMode;
 
       pool.flashLoan({
         receiverAddress: receiverAddress,
-        assets: assets,
-        amounts: amounts,
-        interestRateModes: interestRateModes,
+        assets: vars.assets,
+        amounts: vars.amounts,
+        interestRateModes: vars.interestRateModes,
         onBehalfOf: user,
         params: "0x",
         referralCode: 0
       });
-    }
 
-    uint256 underlyingTokenBalanceOfATokenAfter = IERC20(config.underlying).balanceOf(config.aToken);
-    uint256 debtTokenBalanceOfUserAfter = IERC20(config.variableDebtToken).balanceOf(user);
+    vars.underlyingTokenBalanceOfATokenAfter = IERC20(config.underlying).balanceOf(config.aToken);
+    vars.debtTokenBalanceOfUserAfter = IERC20(config.variableDebtToken).balanceOf(user);
+    vars.underlyingTokenBalanceOfTreasuryAfter = IERC20(config.underlying).balanceOf(vars.treasury);
 
     if (interestRateMode == 0) {
-      assertEq(underlyingTokenBalanceOfATokenBefore + totalPremium, underlyingTokenBalanceOfATokenAfter);
+      assertEq(vars.underlyingTokenBalanceOfATokenBefore + vars.flashLoanPremiumToAToken, vars.underlyingTokenBalanceOfATokenAfter, '11');
+      assertEq(vars.underlyingTokenBalanceOfTreasuryBefore + vars.flashLoanPremiumToProtocol, vars.underlyingTokenBalanceOfTreasuryAfter, '12');
 
-      assertEq(debtTokenBalanceOfUserAfter, debtTokenBalanceOfUserBefore);
+      assertEq(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, '2');
     } else {
-      assertGt(underlyingTokenBalanceOfATokenBefore, underlyingTokenBalanceOfATokenAfter);
-      assertEq(underlyingTokenBalanceOfATokenBefore - amount, underlyingTokenBalanceOfATokenAfter);
+      assertGt(vars.underlyingTokenBalanceOfATokenBefore, vars.underlyingTokenBalanceOfATokenAfter, '3');
+      assertEq(vars.underlyingTokenBalanceOfATokenBefore - amount, vars.underlyingTokenBalanceOfATokenAfter, '4');
 
-      assertGt(debtTokenBalanceOfUserAfter, debtTokenBalanceOfUserBefore);
-      assertApproxEqAbs(debtTokenBalanceOfUserAfter, debtTokenBalanceOfUserBefore + amount, 1);
+      assertGt(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, '5');
+      assertApproxEqAbs(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore + amount, 1, '6');
     }
 
     vm.stopPrank();

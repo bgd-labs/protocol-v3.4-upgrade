@@ -66,10 +66,10 @@ contract UpgradePayload {
   function execute() public virtual {
     // 1. Upgrade pool and configurator implementations
     // to be able to use v3.4 interfaces for the pool and configurator
-    POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
     if (_needToUpgradePoolConfiguratorImpl()) {
       POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
     }
+    POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
 
     // 2. Set a new pool data provider
     POOL_ADDRESSES_PROVIDER.setPoolDataProvider(POOL_DATA_PROVIDER);

@@ -19,7 +19,6 @@ import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 
 import {AaveProtocolDataProvider} from "aave-v3-origin/contracts/helpers/AaveProtocolDataProvider.sol";
 
-import {PoolConfiguratorInstance} from "aave-v3-origin/contracts/instances/PoolConfiguratorInstance.sol";
 import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
 import {ATokenWithDelegationInstance} from "aave-v3-origin/contracts/instances/ATokenWithDelegationInstance.sol";
@@ -50,6 +49,7 @@ import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
 import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCustomInitialize.sol";
+import {PoolConfiguratorWithCustomInitialize} from "../src/PoolConfiguratorWithCustomInitialize.sol";
 
 library DeploymentLibrary {
   // rollups
@@ -247,7 +247,7 @@ library DeploymentLibrary {
     UpgradePayload.ConstructorParams memory payloadParams,
     bool isMainnetCore
   ) private returns (address) {
-    payloadParams.poolConfiguratorImpl = GovV3Helpers.deployDeterministic(type(PoolConfiguratorInstance).creationCode);
+    payloadParams.poolConfiguratorImpl = GovV3Helpers.deployDeterministic(type(PoolConfiguratorWithCustomInitialize).creationCode);
 
     payloadParams.poolDataProvider = GovV3Helpers.deployDeterministic(
       type(AaveProtocolDataProvider).creationCode, abi.encode(deployParams.poolAddressesProvider)
