@@ -9,7 +9,7 @@ import {IATokenWithDelegation} from "aave-v3-origin/contracts/interfaces/IAToken
 
 import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
-import {UpgradePayloadMainnet, IGhoDirectMinter, IGhoToken} from "../src/UpgradePayload.sol";
+import {UpgradePayloadMainnet, IGhoDirectMinter, IGhoToken} from "../src/UpgradePayloadMainnet.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";

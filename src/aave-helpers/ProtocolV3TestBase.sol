@@ -542,40 +542,48 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
 
     console.log("FLASH LOAN: %s, Amount: %s", config.symbol, amount);
 
-      vars.assets = new address[](1);
-      vars.assets[0] = config.underlying;
+    vars.assets = new address[](1);
+    vars.assets[0] = config.underlying;
 
-      vars.amounts = new uint256[](1);
-      vars.amounts[0] = amount;
+    vars.amounts = new uint256[](1);
+    vars.amounts[0] = amount;
 
-      vars.interestRateModes = new uint256[](1);
-      vars.interestRateModes[0] = interestRateMode;
+    vars.interestRateModes = new uint256[](1);
+    vars.interestRateModes[0] = interestRateMode;
 
-      pool.flashLoan({
-        receiverAddress: receiverAddress,
-        assets: vars.assets,
-        amounts: vars.amounts,
-        interestRateModes: vars.interestRateModes,
-        onBehalfOf: user,
-        params: "0x",
-        referralCode: 0
-      });
+    pool.flashLoan({
+      receiverAddress: receiverAddress,
+      assets: vars.assets,
+      amounts: vars.amounts,
+      interestRateModes: vars.interestRateModes,
+      onBehalfOf: user,
+      params: "0x",
+      referralCode: 0
+    });
 
     vars.underlyingTokenBalanceOfATokenAfter = IERC20(config.underlying).balanceOf(config.aToken);
     vars.debtTokenBalanceOfUserAfter = IERC20(config.variableDebtToken).balanceOf(user);
     vars.underlyingTokenBalanceOfTreasuryAfter = IERC20(config.underlying).balanceOf(vars.treasury);
 
     if (interestRateMode == 0) {
-      assertEq(vars.underlyingTokenBalanceOfATokenBefore + vars.flashLoanPremiumToAToken, vars.underlyingTokenBalanceOfATokenAfter, '11');
-      assertEq(vars.underlyingTokenBalanceOfTreasuryBefore + vars.flashLoanPremiumToProtocol, vars.underlyingTokenBalanceOfTreasuryAfter, '12');
+      assertEq(
+        vars.underlyingTokenBalanceOfATokenBefore + vars.flashLoanPremiumToAToken,
+        vars.underlyingTokenBalanceOfATokenAfter,
+        "11"
+      );
+      assertEq(
+        vars.underlyingTokenBalanceOfTreasuryBefore + vars.flashLoanPremiumToProtocol,
+        vars.underlyingTokenBalanceOfTreasuryAfter,
+        "12"
+      );
 
-      assertEq(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, '2');
+      assertEq(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, "2");
     } else {
-      assertGt(vars.underlyingTokenBalanceOfATokenBefore, vars.underlyingTokenBalanceOfATokenAfter, '3');
-      assertEq(vars.underlyingTokenBalanceOfATokenBefore - amount, vars.underlyingTokenBalanceOfATokenAfter, '4');
+      assertGt(vars.underlyingTokenBalanceOfATokenBefore, vars.underlyingTokenBalanceOfATokenAfter, "3");
+      assertEq(vars.underlyingTokenBalanceOfATokenBefore - amount, vars.underlyingTokenBalanceOfATokenAfter, "4");
 
-      assertGt(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, '5');
-      assertApproxEqAbs(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore + amount, 1, '6');
+      assertGt(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore, "5");
+      assertApproxEqAbs(vars.debtTokenBalanceOfUserAfter, vars.debtTokenBalanceOfUserBefore + amount, 1, "6");
     }
 
     vm.stopPrank();

@@ -44,7 +44,8 @@ import {AaveV3EthereumLido, AaveV3EthereumLidoAssets} from "aave-address-book/Aa
 import {AaveV3EthereumEtherFi, AaveV3EthereumEtherFiAssets} from "aave-address-book/AaveV3EthereumEtherFi.sol";
 import {AaveV3Linea, AaveV3LineaAssets} from "aave-address-book/AaveV3Linea.sol";
 
-import {UpgradePayload, UpgradePayloadMainnet} from "../src/UpgradePayload.sol";
+import {UpgradePayload} from "../src/UpgradePayload.sol";
+import {UpgradePayloadMainnet} from "../src/UpgradePayloadMainnet.sol";
 import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
@@ -247,7 +248,8 @@ library DeploymentLibrary {
     UpgradePayload.ConstructorParams memory payloadParams,
     bool isMainnetCore
   ) private returns (address) {
-    payloadParams.poolConfiguratorImpl = GovV3Helpers.deployDeterministic(type(PoolConfiguratorWithCustomInitialize).creationCode);
+    payloadParams.poolConfiguratorImpl =
+      GovV3Helpers.deployDeterministic(type(PoolConfiguratorWithCustomInitialize).creationCode);
 
     payloadParams.poolDataProvider = GovV3Helpers.deployDeterministic(
       type(AaveProtocolDataProvider).creationCode, abi.encode(deployParams.poolAddressesProvider)
