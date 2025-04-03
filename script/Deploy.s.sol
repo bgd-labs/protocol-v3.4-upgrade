@@ -12,7 +12,9 @@ import {
   GnosisScript,
   ScrollScript,
   BNBScript,
-  LineaScript
+  LineaScript,
+  SonicScript,
+  CeloScript
 } from "solidity-utils/contracts/utils/ScriptUtils.sol";
 
 import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
@@ -43,6 +45,8 @@ import {AaveV3Metis, AaveV3MetisAssets} from "aave-address-book/AaveV3Metis.sol"
 import {AaveV3EthereumLido, AaveV3EthereumLidoAssets} from "aave-address-book/AaveV3EthereumLido.sol";
 import {AaveV3EthereumEtherFi, AaveV3EthereumEtherFiAssets} from "aave-address-book/AaveV3EthereumEtherFi.sol";
 import {AaveV3Linea, AaveV3LineaAssets} from "aave-address-book/AaveV3Linea.sol";
+import {AaveV3Sonic, AaveV3SonicAssets} from "aave-address-book/AaveV3Sonic.sol";
+import {AaveV3Celo, AaveV3CeloAssets} from "aave-address-book/AaveV3Celo.sol";
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 import {UpgradePayloadMainnet} from "../src/UpgradePayloadMainnet.sol";
@@ -209,6 +213,30 @@ library DeploymentLibrary {
     deployParams.treasury = address(AaveV3Linea.COLLECTOR);
 
     return _deployL1(deployParams, false);
+  }
+
+  function _deploySonic() internal returns (address) {
+    DeployParameters memory deployParams;
+
+    deployParams.pool = address(AaveV3Sonic.POOL);
+    deployParams.poolAddressesProvider = address(AaveV3Sonic.POOL_ADDRESSES_PROVIDER);
+    deployParams.interestRateStrategy = address(AaveV3SonicAssets.WETH_INTEREST_RATE_STRATEGY);
+    deployParams.rewardsController = AaveV3Sonic.DEFAULT_INCENTIVES_CONTROLLER;
+    deployParams.treasury = address(AaveV3Sonic.COLLECTOR);
+
+    return _deployL1(deployParams, false);
+  }
+
+  function _deployCelo() internal returns (address) {
+    DeployParameters memory deployParams;
+
+    deployParams.pool = address(AaveV3Celo.POOL);
+    deployParams.poolAddressesProvider = address(AaveV3Celo.POOL_ADDRESSES_PROVIDER);
+    deployParams.interestRateStrategy = address(AaveV3CeloAssets.CELO_INTEREST_RATE_STRATEGY);
+    deployParams.rewardsController = AaveV3Celo.DEFAULT_INCENTIVES_CONTROLLER;
+    deployParams.treasury = address(AaveV3Celo.COLLECTOR);
+
+    return _deployL2(deployParams);
   }
 
   struct DeployParameters {
@@ -394,5 +422,17 @@ contract Deployetherfi is EthereumScript {
 contract Deploylinea is LineaScript {
   function run() external broadcast {
     DeploymentLibrary._deployLinea();
+  }
+}
+
+contract Deploysonic is SonicScript {
+  function run() external broadcast {
+    DeploymentLibrary._deploySonic();
+  }
+}
+
+contract Deploycelo is CeloScript {
+  function run() external broadcast {
+    DeploymentLibrary._deployCelo();
   }
 }
