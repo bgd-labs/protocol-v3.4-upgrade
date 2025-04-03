@@ -72,7 +72,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     );
   }
 
-  function execute() public override {
+  function execute() external override {
     // 1. Give risk admin role to the new facilitator for accessing
     // the `setSupplyCap` function in the `PoolConfigurator` contract
     AaveV3Ethereum.ACL_MANAGER.addRiskAdmin(FACILITATOR);
@@ -127,7 +127,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     POOL_CONFIGURATOR.setSupplyCap(AaveV3EthereumAssets.GHO_UNDERLYING, 1);
 
     // 11. Make the normal v3.4 upgrade
-    super.execute();
+    _defaultUpgrade();
 
     // 12. Upgrade the vToken of the GHO token to the new version
     POOL_CONFIGURATOR.updateVariableDebtToken(
@@ -172,9 +172,5 @@ contract UpgradePayloadMainnet is UpgradePayload {
     }
 
     return true;
-  }
-
-  function _needToUpgradePoolConfiguratorImpl() internal pure virtual override returns (bool) {
-    return false;
   }
 }

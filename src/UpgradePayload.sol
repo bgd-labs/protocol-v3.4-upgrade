@@ -49,18 +49,23 @@ contract UpgradePayload {
     V_TOKEN_IMPL = params.vTokenImpl;
   }
 
-  function execute() public virtual {
-    // 1. Upgrade pool and configurator implementations
-    // to be able to use v3.4 interfaces for the pool and configurator
-    if (_needToUpgradePoolConfiguratorImpl()) {
-      POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
-    }
+  function execute() external virtual {
+    // 1. Upgrade configurator implementation
+    // to be able to use v3.4 interfaces for the configurator
+    POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
+
+    _defaultUpgrade();
+  }
+
+  function _defaultUpgrade() internal {
+    // 2. Upgrade pool implementation
+    // to be able to use v3.4 interfaces for the pool
     POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
 
-    // 2. Set a new pool data provider
+    // 3. Set a new pool data provider
     POOL_ADDRESSES_PROVIDER.setPoolDataProvider(POOL_DATA_PROVIDER);
 
-    // 3. Update aTokens and vTokens for all reserves
+    // 4. Update aTokens and vTokens for all reserves
     address[] memory reserves = POOL.getReservesList();
     uint256 length = reserves.length;
     for (uint256 i = 0; i < length; i++) {
@@ -109,10 +114,6 @@ contract UpgradePayload {
   }
 
   function _needToUpdateReserve(address) internal view virtual returns (bool) {
-    return true;
-  }
-
-  function _needToUpgradePoolConfiguratorImpl() internal pure virtual returns (bool) {
     return true;
   }
 }
