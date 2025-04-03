@@ -54,6 +54,10 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebt
 
     _domainSeparator = _calculateDomainSeparator();
 
+    delete _deprecated_ghoAToken;
+    delete _deprecated_discountToken;
+    delete _deprecated_discountRateStrategy;
+
     emit Initialized(
       underlyingAsset,
       address(POOL),
@@ -63,13 +67,6 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebt
       debtTokenSymbol,
       params
     );
-  }
-
-  /// @inheritdoc IVariableDebtTokenMainnetInstanceGHO
-  function migrateToV3_4() external override onlyPoolAdmin {
-    delete _deprecated_ghoAToken;
-    delete _deprecated_discountToken;
-    delete _deprecated_discountRateStrategy;
   }
 
   /// @inheritdoc IVariableDebtTokenMainnetInstanceGHO

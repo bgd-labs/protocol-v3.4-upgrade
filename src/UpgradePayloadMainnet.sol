@@ -161,9 +161,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
         params: ""
       })
     );
-
-    // 15. Migrate the vToken of the GHO token to the new version
-    IVariableDebtTokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_V_TOKEN).migrateToV3_4();
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
