@@ -29,6 +29,10 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     delete _deprecated_ghoVariableDebtToken;
     delete _deprecated_ghoTreasury;
 
+    // @note This action is needed to remove this aToken from facilitator list.
+    //       In order to do this, a facilitator should have it's bucket level set to 0.
+    //       The facilitator bucket of this token (capacity and level) will be transferred
+    //       to a new `GhoDirectMinter` contract.
     IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).burn(amount);
   }
 }
