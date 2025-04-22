@@ -5,12 +5,12 @@
   "poolConfig": {
     "protocolDataProvider": {
       "from": "0x306c124fFba5f2Bc0BcAf40D249cf19D492440b9",
-      "to": "0x42BCC61d574122354A1B9db26780B7687E95a511"
+      "to": "0x03e3F9Ea035dEB0432a755dCe0cC67B371F07785"
     }
   },
   "raw": {
     "0x07b1adfb7d5795cf21bae8a77eceb222f2fafbce": {
-      "label": "AaveV3Sonic.ASSETS.WETH.V_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -43,13 +43,13 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x000000000000000000000000cb85c501b3a5e9851850d66648d69b26a4c90942",
-          "newValue": "0x000000000000000000000000b17fb8ee0e7bc6758e90260e52a8cf0bc2799476",
+          "newValue": "0x000000000000000000000000a8c4aee3f0aeb572b7d711c97b24dd4b98e7c578",
           "label": "Implementation slot"
         }
       }
     },
     "0x0846c28dd54dea4fd7fb31bcc5eb81673d68c695": {
-      "label": "GovernanceV3Sonic.PAYLOADS_CONTROLLER",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0xcbc4e5fb02c3d1de23a9f1e014b4d2ee5aeaea9505df5e855c9210bf472495af": {
@@ -63,7 +63,7 @@
       }
     },
     "0x2273cabad63b7d247a6b107e723c803fc49953a0": {
-      "label": "AaveV3Sonic.ASSETS.USDCe.V_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -96,13 +96,13 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x000000000000000000000000cb85c501b3a5e9851850d66648d69b26a4c90942",
-          "newValue": "0x000000000000000000000000b17fb8ee0e7bc6758e90260e52a8cf0bc2799476",
+          "newValue": "0x000000000000000000000000a8c4aee3f0aeb572b7d711c97b24dd4b98e7c578",
           "label": "Implementation slot"
         }
       }
     },
     "0x50c70feb95abc1a92fc30b9acc41bd349e5de2f0": {
-      "label": "AaveV3Sonic.POOL_CONFIGURATOR",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -123,13 +123,13 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x0000000000000000000000005cc4f782cfe249286476a7effd9d7bd215768194",
-          "newValue": "0x00000000000000000000000059b50eebae32c2bf685686f0198600dd764b9866",
+          "newValue": "0x000000000000000000000000fb01fc9f1450051c338ecddbb6f629ae97fcb5c3",
           "label": "Implementation slot"
         }
       }
     },
     "0x5362dbb1e601abf3a4c14c22ffeda64042e5eaa3": {
-      "label": "AaveV3Sonic.POOL",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -150,7 +150,7 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x00000000000000000000000046dcd5f4600319b02649fd76b55aa6c1035ca478",
-          "newValue": "0x000000000000000000000000b916f963a788940baf2c29ee8d1169e25e275595",
+          "newValue": "0x00000000000000000000000012e75f4ce64af62680fcdc52e5d60cd3613b24fc",
           "label": "Implementation slot"
         },
         "0x37b7fc6fa4a96109d1745c7f989f397f19e6bafe7d5438dd5a1507240efe1fb6": {
@@ -172,7 +172,7 @@
       }
     },
     "0x578ee1ca3a8e1b54554da1bf7c583506c4cd11c6": {
-      "label": "AaveV3Sonic.ASSETS.USDCe.A_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -205,23 +205,23 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x00000000000000000000000091fc11136d5615575a0fc5981ab5c0c54418e2c6",
-          "newValue": "0x000000000000000000000000024237f270fe029659617cef7c382afeb8dbc93b",
+          "newValue": "0x0000000000000000000000009a01af53fece2c34dea361c133621cc0b64d298e",
           "label": "Implementation slot"
         }
       }
     },
     "0x5c2e738f6e27bce0f7558051bf90605dd6176900": {
-      "label": "AaveV3Sonic.POOL_ADDRESSES_PROVIDER",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0xcd7944601aaa5cd7ccdae1bebec659e98c6aac8f12486b30e59db0d39698051f": {
           "previousValue": "0x000000000000000000000000306c124ffba5f2bc0bcaf40d249cf19d492440b9",
-          "newValue": "0x00000000000000000000000042bcc61d574122354a1b9db26780b7687e95a511"
+          "newValue": "0x00000000000000000000000003e3f9ea035deb0432a755dce0cc67b371f07785"
         }
       }
     },
     "0x6c5e14a212c1c3e4baf6f871ac9b1a969918c131": {
-      "label": "AaveV3Sonic.ASSETS.wS.A_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -254,13 +254,13 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x00000000000000000000000091fc11136d5615575a0fc5981ab5c0c54418e2c6",
-          "newValue": "0x000000000000000000000000024237f270fe029659617cef7c382afeb8dbc93b",
+          "newValue": "0x0000000000000000000000009a01af53fece2c34dea361c133621cc0b64d298e",
           "label": "Implementation slot"
         }
       }
     },
     "0xe18ab82c81e7eecff32b8a82b1b7d2d23f1ece96": {
-      "label": "AaveV3Sonic.ASSETS.WETH.A_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -293,13 +293,13 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x00000000000000000000000091fc11136d5615575a0fc5981ab5c0c54418e2c6",
-          "newValue": "0x000000000000000000000000024237f270fe029659617cef7c382afeb8dbc93b",
+          "newValue": "0x0000000000000000000000009a01af53fece2c34dea361c133621cc0b64d298e",
           "label": "Implementation slot"
         }
       }
     },
     "0xf6089b790fbf8f4812a79a31cfabeb00b06ba7bd": {
-      "label": "AaveV3Sonic.ASSETS.wS.V_TOKEN",
+      "label": null,
       "balanceDiff": null,
       "stateDiff": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": {
@@ -332,7 +332,7 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x000000000000000000000000cb85c501b3a5e9851850d66648d69b26a4c90942",
-          "newValue": "0x000000000000000000000000b17fb8ee0e7bc6758e90260e52a8cf0bc2799476",
+          "newValue": "0x000000000000000000000000a8c4aee3f0aeb572b7d711c97b24dd4b98e7c578",
           "label": "Implementation slot"
         }
       }
