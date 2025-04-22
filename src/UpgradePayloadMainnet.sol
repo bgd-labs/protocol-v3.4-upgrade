@@ -161,6 +161,9 @@ contract UpgradePayloadMainnet is UpgradePayload {
         params: ""
       })
     );
+
+    // 15. Enable flashloans for GHO
+    POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {

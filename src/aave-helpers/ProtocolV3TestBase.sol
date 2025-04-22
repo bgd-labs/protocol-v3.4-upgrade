@@ -557,7 +557,7 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
       amounts: vars.amounts,
       interestRateModes: vars.interestRateModes,
       onBehalfOf: user,
-      params: "0x",
+      params: "",
       referralCode: 0
     });
 

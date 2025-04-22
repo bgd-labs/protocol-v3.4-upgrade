@@ -37,6 +37,11 @@ contract MainnetTest is UpgradeTest("mainnet", 22089018) {
 
     assertEq(AaveV3Ethereum.POOL.getReserveNormalizedIncome(AaveV3EthereumAssets.GHO_UNDERLYING), 1e27);
 
+    DataTypes.ReserveDataLegacy memory reserveData =
+      AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
+    assertFalse(reserveData.configuration.getFlashLoanEnabled());
+
+
     super.test_upgrade();
 
     assertEq(IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).balanceOf(AaveV3EthereumAssets.GHO_A_TOKEN), 0);
@@ -58,10 +63,11 @@ contract MainnetTest is UpgradeTest("mainnet", 22089018) {
 
     assertTrue(AaveV3Ethereum.ACL_MANAGER.isRiskAdmin(_payload.FACILITATOR()));
 
-    DataTypes.ReserveDataLegacy memory reserveData =
+    reserveData =
       AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(reserveData.configuration.getSupplyCap(), 1);
     assertEq(reserveData.configuration.getReserveFactor(), 100_00);
+    assertTrue(reserveData.configuration.getFlashLoanEnabled());
 
     // test updateDiscountDistribution function in the vToken of the GHO aToken
     VariableDebtTokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_V_TOKEN).updateDiscountDistribution(
