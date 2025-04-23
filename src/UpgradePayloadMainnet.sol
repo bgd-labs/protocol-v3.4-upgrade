@@ -18,6 +18,7 @@ import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
 import {IOldATokenMainnetInstanceGHO} from "./interfaces/IOldATokenMainnetInstanceGHO.sol";
 import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTokenMainnetInstanceGHO.sol";
+import {IGhoBucketSteward} from "./interfaces/IGhoBucketSteward.sol";
 
 import {UpgradePayload} from "./UpgradePayload.sol";
 
@@ -164,6 +165,20 @@ contract UpgradePayloadMainnet is UpgradePayload {
 
     // 15. Enable flashloans for GHO
     POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
+
+    // 16. Mint supply on the instance
+    if (capacity > level) {
+      IGhoDirectMinter(FACILITATOR).mintAndSupply(capacity - level);
+    }
+
+    // 17. Allow risk council to control the bucket capacity
+    address[] memory vaults = new address[](1);
+    vaults[0] = FACILITATOR;
+    // https://etherscan.io/address/0x46Aa1063e5265b43663E81329333B47c517A5409
+    IGhoBucketSteward(0x46Aa1063e5265b43663E81329333B47c517A5409).setControlledFacilitator(vaults, true);
+    vaults[0] = AaveV3EthereumAssets.GHO_A_TOKEN;
+    // https://etherscan.io/address/0x46Aa1063e5265b43663E81329333B47c517A5409
+    IGhoBucketSteward(0x46Aa1063e5265b43663E81329333B47c517A5409).setControlledFacilitator(vaults, false);
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
