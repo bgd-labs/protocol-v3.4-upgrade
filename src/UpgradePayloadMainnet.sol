@@ -10,6 +10,7 @@ import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/librarie
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
 import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
+import {GhoEthereum} from "aave-address-book/GhoEthereum.sol";
 
 import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
 import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
@@ -174,11 +175,9 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // 17. Allow risk council to control the bucket capacity
     address[] memory vaults = new address[](1);
     vaults[0] = FACILITATOR;
-    // https://etherscan.io/address/0x46Aa1063e5265b43663E81329333B47c517A5409
-    IGhoBucketSteward(0x46Aa1063e5265b43663E81329333B47c517A5409).setControlledFacilitator(vaults, true);
+    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);
     vaults[0] = AaveV3EthereumAssets.GHO_A_TOKEN;
-    // https://etherscan.io/address/0x46Aa1063e5265b43663E81329333B47c517A5409
-    IGhoBucketSteward(0x46Aa1063e5265b43663E81329333B47c517A5409).setControlledFacilitator(vaults, false);
+    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, false);
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
