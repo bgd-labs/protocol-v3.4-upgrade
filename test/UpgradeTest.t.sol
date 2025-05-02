@@ -95,6 +95,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     uint256[] memory interestRateModes = new uint256[](reserves.length);
     for (uint256 i = 0; i < reserves.length; i++) {
       oldVirtualUnderlyingBalances[i] = POOL.getVirtualUnderlyingBalance(reserves[i]);
+      console.log(oldVirtualUnderlyingBalances[i]);
 
       DataTypes.ReserveConfigurationMap memory configuration = POOL.getConfiguration(reserves[i]);
 
@@ -103,7 +104,11 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       }
 
       filteredReserves[length] = reserves[i];
-      amounts[length] = oldVirtualUnderlyingBalances[i];
+      // the amount flashed does not really matter
+      // we're limiting it on the test as we know that the vBalanceDelta in some cases is slightly negative
+      // and for some assets `deal` does not work, so we fallback to user transfers which for most assets don't have enough funds
+      // to "deal" the whole available VirtualUnderlyingBalance
+      amounts[length] = oldVirtualUnderlyingBalances[i] / 2;
       interestRateModes[length] = 0;
 
       ++length;
@@ -114,6 +119,8 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       mstore(interestRateModes, length)
     }
 
+    // bytes("") is for explicitly empty errors (EvmError: Revert)
+    vm.expectRevert(bytes(""));
     POOL.flashLoan({
       receiverAddress: address(this),
       assets: filteredReserves,
