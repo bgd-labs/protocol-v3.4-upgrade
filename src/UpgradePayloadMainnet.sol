@@ -6,8 +6,10 @@ import {ITransparentProxyFactory} from
 
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol";
+import {IncentivizedERC20} from "aave-v3-origin/contracts/protocol/tokenization/base/IncentivizedERC20.sol";
 
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
@@ -64,11 +66,26 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     )
   {
+    IPool pool = IPool(params.poolAddressesProvider.getPool());
+
+    // @note There is no `POOL` function in the IAToken interface
+    if (
+      IncentivizedERC20(params.aTokenGhoImpl).POOL() != pool || IncentivizedERC20(params.vTokenGhoImpl).POOL() != pool
+        || IncentivizedERC20(params.aTokenWithDelegationImpl).POOL() != pool
+    ) {
+      revert WrongAddresses();
+    }
     A_TOKEN_GHO_IMPL = params.aTokenGhoImpl;
     V_TOKEN_GHO_IMPL = params.vTokenGhoImpl;
-
     A_TOKEN_WITH_DELEGATION_IMPL = params.aTokenWithDelegationImpl;
 
+    if (
+      IGhoDirectMinter(params.ghoFacilitatorImpl).POOL() != pool
+        || address(IGhoDirectMinter(params.ghoFacilitatorImpl).POOL_CONFIGURATOR())
+          != params.poolAddressesProvider.getPoolConfigurator()
+    ) {
+      revert WrongAddresses();
+    }
     FACILITATOR = ITransparentProxyFactory(MiscEthereum.TRANSPARENT_PROXY_FACTORY).create(
       params.ghoFacilitatorImpl,
       MiscEthereum.PROXY_ADMIN,

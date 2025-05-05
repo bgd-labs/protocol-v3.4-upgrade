@@ -33,6 +33,13 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     string calldata aTokenSymbol,
     bytes calldata params
   ) public virtual override initializer {
+    // @note this is the default initialization function
+    // the same as the `ATokenInstance.initialize` function
+    // but contains the additional logic for deleting the deprecated variables
+
+    delete _deprecated_ghoVariableDebtToken;
+    delete _deprecated_ghoTreasury;
+
     require(initializingPool == POOL, Errors.PoolAddressesDoNotMatch());
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
@@ -41,9 +48,6 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     _underlyingAsset = underlyingAsset;
 
     _domainSeparator = _calculateDomainSeparator();
-
-    delete _deprecated_ghoVariableDebtToken;
-    delete _deprecated_ghoTreasury;
 
     emit Initialized(
       underlyingAsset,
