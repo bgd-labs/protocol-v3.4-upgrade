@@ -4,6 +4,8 @@ pragma solidity ^0.8.10;
 import {ITransparentProxyFactory} from
   "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
 
+import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol";
 
@@ -104,8 +106,8 @@ contract UpgradePayloadMainnet is UpgradePayload {
     POOL_CONFIGURATOR.updateAToken(
       ConfiguratorInputTypes.UpdateATokenInput({
         asset: AaveV3EthereumAssets.GHO_UNDERLYING,
-        name: "Aave Ethereum GHO",
-        symbol: "aEthGHO",
+        name: IERC20Metadata(AaveV3EthereumAssets.GHO_A_TOKEN).name(),
+        symbol: IERC20Metadata(AaveV3EthereumAssets.GHO_A_TOKEN).symbol(),
         implementation: A_TOKEN_GHO_IMPL,
         params: ""
       })
