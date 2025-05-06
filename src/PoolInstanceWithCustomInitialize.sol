@@ -25,6 +25,7 @@ contract PoolInstanceWithCustomInitialize is PoolInstance {
     CustomInitialize._initialize(_reservesCount, _reservesList, _reserves);
 
     // @note Should be executed only on the Ethereum Mainnet Core Pool instance
+    //       The check is sufficient as the Ethereum Core Pool address is unique across chains.
     if (address(this) == address(AaveV3Ethereum.POOL)) {
       DataTypes.ReserveData storage currentGHOConfig = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING];
       DataTypes.ReserveConfigurationMap memory currentGHOConfigConfig = currentGHOConfig.configuration;
