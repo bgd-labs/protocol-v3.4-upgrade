@@ -72,6 +72,12 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       address aToken = pool.getReserveAToken(reserve);
 
       assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
+
+      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserve);
+
+      uint256 virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
+        >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
+      assertEq(virtualAccActiveFlag, 1);
     }
   }
 
