@@ -101,7 +101,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // 2. Initialize the new facilitator with levels of the previous facilitator
     (uint256 capacity, uint256 level) =
       IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
-    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).addFacilitator(FACILITATOR, "GhoDirectMinter", uint128(capacity));
+    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).addFacilitator(FACILITATOR, "CoreGhoDirectMinter", uint128(capacity));
 
     // Right now there is the total supply of the `GHO_A_TOKEN` equals to zero
     // and also there is some GHO minted tokens by this aToken (variable `level`).
