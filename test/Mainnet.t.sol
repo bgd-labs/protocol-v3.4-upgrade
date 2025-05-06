@@ -72,10 +72,12 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
 
     assertTrue(AaveV3Ethereum.ACL_MANAGER.isRiskAdmin(_payload.FACILITATOR()));
 
+    address oldGHOInterestRateStrategyAddress = reserveData.interestRateStrategyAddress;
     reserveData = AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(reserveData.configuration.getSupplyCap(), 1);
     assertEq(reserveData.configuration.getReserveFactor(), 100_00);
     assertTrue(reserveData.configuration.getFlashLoanEnabled());
+    assertEq(reserveData.interestRateStrategyAddress, oldGHOInterestRateStrategyAddress);
 
     virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
