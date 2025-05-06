@@ -20,6 +20,8 @@ import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.so
 import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
 import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 
+import {IDelegationToken} from "./interfaces/IDelegationToken.sol";
+import {IDelegationAwareAToken} from "./interfaces/IDelegationAwareAToken.sol";
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
 import {IOldATokenMainnetInstanceGHO} from "./interfaces/IOldATokenMainnetInstanceGHO.sol";
 import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTokenMainnetInstanceGHO.sol";
@@ -147,51 +149,58 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // 10. set a supply cap so noone can supply, as 0 currently is unlimited
     POOL_CONFIGURATOR.setSupplyCap(AaveV3EthereumAssets.GHO_UNDERLYING, 1);
 
-    // 11. Make the normal v3.4 upgrade
+    // 11. Check if the UNI AToken delegated his votes or not. If voted then remove it.
+    if (IDelegationToken(AaveV3EthereumAssets.UNI_UNDERLYING).delegates(AaveV3EthereumAssets.UNI_A_TOKEN) != address(0))
+    {
+      // this must be done by user with the role "Pool Admin" in the ACL
+      IDelegationAwareAToken(AaveV3EthereumAssets.UNI_A_TOKEN).delegateUnderlyingTo(address(0));
+    }
+
+    // 12. Make the normal v3.4 upgrade
     _defaultUpgrade();
 
-    // 12. Upgrade the vToken of the GHO token to the new version
+    // 13. Upgrade the vToken of the GHO token to the new version
     POOL_CONFIGURATOR.updateVariableDebtToken(
       ConfiguratorInputTypes.UpdateDebtTokenInput({
         asset: AaveV3EthereumAssets.GHO_UNDERLYING,
-        name: "Aave Ethereum Variable Debt GHO",
-        symbol: "variableDebtEthGHO",
+        name: IERC20Metadata(AaveV3EthereumAssets.GHO_V_TOKEN).name(),
+        symbol: IERC20Metadata(AaveV3EthereumAssets.GHO_V_TOKEN).symbol(),
         implementation: V_TOKEN_GHO_IMPL,
         params: ""
       })
     );
 
-    // 13. Upgrade the aToken of the AAVE token to the new version
+    // 14. Upgrade the aToken of the AAVE token to the new version
     POOL_CONFIGURATOR.updateAToken(
       ConfiguratorInputTypes.UpdateATokenInput({
         asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
-        name: "Aave Ethereum AAVE",
-        symbol: "aEthAAVE",
+        name: IERC20Metadata(AaveV3EthereumAssets.AAVE_A_TOKEN).name(),
+        symbol: IERC20Metadata(AaveV3EthereumAssets.AAVE_A_TOKEN).symbol(),
         implementation: A_TOKEN_WITH_DELEGATION_IMPL,
         params: ""
       })
     );
 
-    // 14. Upgrade the vToken of the AAVE token to the new version
+    // 15. Upgrade the vToken of the AAVE token to the new version
     POOL_CONFIGURATOR.updateVariableDebtToken(
       ConfiguratorInputTypes.UpdateDebtTokenInput({
         asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
-        name: "Aave Ethereum Variable Debt AAVE",
-        symbol: "variableDebtEthAAVE",
+        name: IERC20Metadata(AaveV3EthereumAssets.AAVE_V_TOKEN).name(),
+        symbol: IERC20Metadata(AaveV3EthereumAssets.AAVE_V_TOKEN).symbol(),
         implementation: V_TOKEN_IMPL,
         params: ""
       })
     );
 
-    // 15. Enable flashloans for GHO
+    // 16. Enable flashloans for GHO
     POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
 
-    // 16. Mint supply on the instance
+    // 17. Mint supply on the instance
     if (capacity > level) {
       IGhoDirectMinter(FACILITATOR).mintAndSupply(capacity - level);
     }
 
-    // 17. Allow risk council to control the bucket capacity
+    // 18. Allow risk council to control the bucket capacity
     address[] memory vaults = new address[](1);
     vaults[0] = FACILITATOR;
     IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);
