@@ -1,17 +1,3 @@
 {
-  "arbitrum": "4096640",
-  "avalanche": "2873503",
-  "base": "2607237",
-  "bnb": "1796360",
-  "celo": "1150360",
-  "gnosis": "1771838",
-  "linea": "1586109",
-  "mainnet": "9048327",
-  "mainnetEtherFi": "1023016",
-  "mainnetLido": "1848577",
-  "metis": "1160032",
-  "optimism": "3008499",
-  "polygon": "4508217",
-  "scroll": "1169719",
-  "sonic": "747716"
+  "mainnet": "9048327"
 }

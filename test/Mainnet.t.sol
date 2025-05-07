@@ -98,10 +98,7 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       + uint256(reserveData.accruedToTreasury).rayMul(
         AaveV3Ethereum.POOL.getReserveNormalizedIncome(AaveV3EthereumAssets.GHO_UNDERLYING)
       );
-    assertGt(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
-    assertApproxEqRel(
-      theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity, 0.005e18
-    );
+    assertEq(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
 
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
       reserveData.interestRateStrategyAddress
