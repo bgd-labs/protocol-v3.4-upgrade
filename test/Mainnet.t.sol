@@ -16,7 +16,7 @@ import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainn
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";
 
-contract MainnetTest is UpgradeTest("mainnet", 22331905) {
+contract MainnetTest is UpgradeTest("mainnet", 22431434) {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
 
