@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.10;
 
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-
 import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
 import {Errors} from "aave-v3-origin/contracts/protocol/libraries/helpers/Errors.sol";
 import {IVariableDebtToken} from "aave-v3-origin/contracts/interfaces/IVariableDebtToken.sol";
@@ -34,15 +32,15 @@ contract PoolInstanceWithCustomInitialize is PoolInstance {
 
     // @note Should be executed only on the Ethereum Mainnet Core Pool instance
     //       The check is sufficient as the Ethereum Core Pool address is unique across chains.
-    if (address(this) == address(AaveV3Ethereum.POOL)) {
+    if (address(this) == address(AaveV3Ethereum.POOL) && block.chainid == 1) {
       // 1. Update the `virtualAcc` configuration of the GHO reserve
 
-      DataTypes.ReserveData storage currentGHOConfig = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING];
-      DataTypes.ReserveConfigurationMap memory currentGHOConfigConfig = currentGHOConfig.configuration;
+      DataTypes.ReserveData storage ghoReserveData = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING];
+      DataTypes.ReserveConfigurationMap memory GHOConfig = ghoReserveData.configuration;
 
-      currentGHOConfigConfig.setVirtualAccActive();
+      GHOConfig.setVirtualAccActive();
 
-      currentGHOConfig.configuration = currentGHOConfigConfig;
+      ghoReserveData.configuration = GHOConfig;
 
       // 2. Update the `accruedToTreasury` variable of the GHO token
 
@@ -55,14 +53,13 @@ contract PoolInstanceWithCustomInitialize is PoolInstance {
       // supply of the `GHO_A_TOKEN` as an initial level of the AToken of the GHO.
 
       uint256 normalizedDebt = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING].getNormalizedDebt();
-      uint256 vTokenScaledTotalSupply =
-        IVariableDebtToken(currentGHOConfig.variableDebtTokenAddress).scaledTotalSupply();
+      uint256 vTokenScaledTotalSupply = IVariableDebtToken(ghoReserveData.variableDebtTokenAddress).scaledTotalSupply();
       uint256 vTokenTotalSupply = vTokenScaledTotalSupply.rayMul(normalizedDebt);
 
       // @note index is 1, we can use scaled
       uint256 level = IVariableDebtToken(AaveV3EthereumAssets.GHO_A_TOKEN).scaledTotalSupply();
 
-      currentGHOConfig.accruedToTreasury = uint128(vTokenTotalSupply - level);
+      ghoReserveData.accruedToTreasury = uint128(vTokenTotalSupply - level);
     }
   }
 }
