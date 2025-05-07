@@ -100,6 +100,9 @@ contract MainnetTest is UpgradeTest("mainnet", 22431434) {
       );
     assertEq(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
 
+    // milkmath check reading from etherscan,w hcih also matches what is shown here: https://aave.tokenlogic.xyz/gho-revenue
+    assertApproxEqAbs(reserveData.accruedToTreasury, 2_453_753_496504028593200000, 1_000);
+
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
       reserveData.interestRateStrategyAddress
     ).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
