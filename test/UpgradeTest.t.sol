@@ -22,6 +22,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   string public NETWORK;
+  string public NETWORK_SUB_NAME;
   uint256 public immutable BLOCK_NUMBER;
 
   IPool public override POOL;
@@ -83,7 +84,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
 
   function test_gas() external {
     executePayload(vm, address(_getPayload()));
-    vm.snapshotGasLastCall("Execution", NETWORK);
+    vm.snapshotGasLastCall("Execution", string.concat(NETWORK, NETWORK_SUB_NAME));
   }
 
   function test_flashloan_attack() public {
