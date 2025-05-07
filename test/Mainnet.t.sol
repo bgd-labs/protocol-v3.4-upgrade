@@ -6,6 +6,7 @@ import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethe
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {DataTypes} from "aave-v3-origin/contracts/protocol/libraries/types/DataTypes.sol";
 import {IATokenWithDelegation} from "aave-v3-origin/contracts/interfaces/IATokenWithDelegation.sol";
+import {IDefaultInterestRateStrategyV2} from "aave-v3-origin/contracts/interfaces/IDefaultInterestRateStrategyV2.sol";
 
 import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
@@ -45,6 +46,8 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
     assertEq(virtualAccActiveFlag, 0);
 
+    IDefaultInterestRateStrategyV2.InterestRateData memory oldGHOInterestRateData = IDefaultInterestRateStrategyV2(reserveData.interestRateStrategyAddress).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
+
     super.test_upgrade();
 
     assertEq(
@@ -72,16 +75,20 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
 
     assertTrue(AaveV3Ethereum.ACL_MANAGER.isRiskAdmin(_payload.FACILITATOR()));
 
-    address oldGHOInterestRateStrategyAddress = reserveData.interestRateStrategyAddress;
     reserveData = AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(reserveData.configuration.getSupplyCap(), 1);
     assertEq(reserveData.configuration.getReserveFactor(), 100_00);
     assertTrue(reserveData.configuration.getFlashLoanEnabled());
-    assertEq(reserveData.interestRateStrategyAddress, oldGHOInterestRateStrategyAddress);
 
     virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
     assertEq(virtualAccActiveFlag, 1);
+
+    IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(reserveData.interestRateStrategyAddress).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
+    assertEq(oldGHOInterestRateData.baseVariableBorrowRate, newGHOInterestRateData.baseVariableBorrowRate);
+    assertEq(oldGHOInterestRateData.variableRateSlope1, newGHOInterestRateData.variableRateSlope1);
+    assertEq(oldGHOInterestRateData.variableRateSlope2, newGHOInterestRateData.variableRateSlope2);
+    assertEq(oldGHOInterestRateData.optimalUsageRatio, newGHOInterestRateData.optimalUsageRatio);
 
     // test updateDiscountDistribution function in the vToken of the GHO aToken
     VariableDebtTokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_V_TOKEN).updateDiscountDistribution(
