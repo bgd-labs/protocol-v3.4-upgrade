@@ -46,7 +46,9 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
     assertEq(virtualAccActiveFlag, 0);
 
-    IDefaultInterestRateStrategyV2.InterestRateData memory oldGHOInterestRateData = IDefaultInterestRateStrategyV2(reserveData.interestRateStrategyAddress).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
+    IDefaultInterestRateStrategyV2.InterestRateData memory oldGHOInterestRateData = IDefaultInterestRateStrategyV2(
+      reserveData.interestRateStrategyAddress
+    ).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
 
     super.test_upgrade();
 
@@ -84,7 +86,9 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
     assertEq(virtualAccActiveFlag, 1);
 
-    IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(reserveData.interestRateStrategyAddress).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
+    IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
+      reserveData.interestRateStrategyAddress
+    ).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(oldGHOInterestRateData.baseVariableBorrowRate, newGHOInterestRateData.baseVariableBorrowRate);
     assertEq(oldGHOInterestRateData.variableRateSlope1, newGHOInterestRateData.variableRateSlope1);
     assertEq(oldGHOInterestRateData.variableRateSlope2, newGHOInterestRateData.variableRateSlope2);

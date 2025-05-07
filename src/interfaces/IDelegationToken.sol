@@ -14,5 +14,5 @@ interface IDelegationToken {
   function delegate(address delegatee) external;
 
   /// @notice A record of each accounts delegate
-  function delegates(address) external view returns(address);
+  function delegates(address) external view returns (address);
 }
