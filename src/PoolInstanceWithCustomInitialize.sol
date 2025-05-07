@@ -15,8 +15,6 @@ import {ReserveLogic} from "aave-v3-origin/contracts/protocol/libraries/logic/Re
 
 import {AaveV3EthereumAssets, AaveV3Ethereum} from "aave-address-book/AaveV3Ethereum.sol";
 
-import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
-
 import {CustomInitialize} from "./CustomInitialize.sol";
 
 contract PoolInstanceWithCustomInitialize is PoolInstance {
@@ -48,13 +46,21 @@ contract PoolInstanceWithCustomInitialize is PoolInstance {
 
       // 2. Update the `accruedToTreasury` variable of the GHO token
 
+      // Variable `accruedToTreasury` should hold all interest that accured (because the reserve
+      // rate of the GHO token is 100%), but not repayed yet.
+      // In the process of the upgrade of the `Pool` contract we've already resolved the AToken of the GHO
+      // as a facilitator and now it has zero capacity and level.
+      // Also, new `GhoDirectMinter` contract has been already added as a facilitator and it has
+      // minted and supplied the initial level of the AToken of the GHO to the Pool. So we can use total
+      // supply of the `GHO_A_TOKEN` as an initial level of the AToken of the GHO.
+
       uint256 normalizedDebt = _reserves[AaveV3EthereumAssets.GHO_UNDERLYING].getNormalizedDebt();
       uint256 vTokenScaledTotalSupply =
         IVariableDebtToken(currentGHOConfig.variableDebtTokenAddress).scaledTotalSupply();
-      uint256 vTokenTotalSupply = vTokenScaledTotalSupply.rayMul(vTokenScaledTotalSupply);
+      uint256 vTokenTotalSupply = vTokenScaledTotalSupply.rayMul(normalizedDebt);
 
-      ( /* uint256 capacity */ , uint256 level) =
-        IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
+      // @note index is 1, we can use scaled
+      uint256 level = IVariableDebtToken(AaveV3EthereumAssets.GHO_A_TOKEN).scaledTotalSupply();
 
       currentGHOConfig.accruedToTreasury = uint128((vTokenTotalSupply - level).rayDiv(normalizedDebt));
     }

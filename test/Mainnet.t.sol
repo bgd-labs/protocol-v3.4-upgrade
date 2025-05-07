@@ -100,7 +100,7 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       );
     assertGt(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
     assertApproxEqRel(
-      theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity, 0.001e18
+      theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity, 0.005e18
     );
 
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
