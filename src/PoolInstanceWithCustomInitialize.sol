@@ -53,7 +53,7 @@ contract PoolInstanceWithCustomInitialize is PoolInstance {
       // @note index is 1, we can use scaled
       uint256 level = IScaledBalanceToken(AaveV3EthereumAssets.GHO_A_TOKEN).scaledTotalSupply();
 
-      ghoReserveData.accruedToTreasury = uint128(vTokenTotalSupply - level);
+      ghoReserveData.accruedToTreasury = uint128(vTokenTotalSupply + ghoReserveData.deficit - level);
     }
   }
 }
