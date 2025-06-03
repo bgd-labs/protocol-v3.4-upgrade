@@ -39,7 +39,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     BLOCK_NUMBER = blocknumber;
   }
 
-  function setUp() public {
+  function setUp() public virtual {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
   }
 

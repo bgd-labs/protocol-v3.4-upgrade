@@ -4,17 +4,20 @@ pragma solidity ^0.8.10;
 import {ITransparentProxyFactory} from
   "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
 
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol";
 import {IncentivizedERC20} from "aave-v3-origin/contracts/protocol/tokenization/base/IncentivizedERC20.sol";
+import {IERC20 as IERC20Collector} from "aave-v3-origin/contracts/treasury/ICollector.sol";
 
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
 import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {GhoEthereum} from "aave-address-book/GhoEthereum.sol";
+import {UmbrellaEthereum} from "aave-address-book/UmbrellaEthereum.sol";
 
 import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
 import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
@@ -176,12 +179,19 @@ contract UpgradePayloadMainnet is UpgradePayload {
       IDelegationAwareAToken(AaveV3EthereumAssets.UNI_A_TOKEN).delegateUnderlyingTo(address(0));
     }
 
-    // TODO: Before doing the upgrade we will also clean up the existing deficit.
-    // This code is not yet implemented as the exact execution depends on the state of the protocol at execution time.
-    // If umbrella is live by then, the proposal will cover the deficit via umbrella.
-    // If not, we will give the umbrella role to the executor and clear the deficit from here.
+    // 12. Clear any existing GHO deficit in the v3.3 Pool before upgrading the Pool implementation.
+    uint256 currentDeficitGHO = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
+    if (currentDeficitGHO != 0) {
+      AaveV3Ethereum.COLLECTOR.transfer(
+        IERC20Collector(AaveV3EthereumAssets.GHO_UNDERLYING), address(this), currentDeficitGHO
+      );
 
-    // 12. Execute the default v3.4 upgrade steps (updates Pool to `PoolInstanceWithCustomInitialize`, PoolDataProvider,
+      IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).approve(address(UmbrellaEthereum.UMBRELLA), currentDeficitGHO);
+
+      UmbrellaEthereum.UMBRELLA.coverDeficitOffset(AaveV3EthereumAssets.GHO_UNDERLYING, currentDeficitGHO);
+    }
+
+    // 13. Execute the default v3.4 upgrade steps (updates Pool to `PoolInstanceWithCustomInitialize`, PoolDataProvider,
     //     and standard AToken/VariableDebtToken implementations).
     //     Inside `PoolInstanceWithCustomInitialize.initialize()`:
     //       - GHO-specific logic sets `accruedToTreasury` and `virtualAccActive=true`.
@@ -192,7 +202,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // - GHO reserve's `virtualUnderlyingBalance`: 0.
     // - GHO balance of the `GHO_A_TOKEN` contract: 0.
 
-    // 13. Upgrade the GHO VariableDebtToken (`GHO_V_TOKEN`) to its new custom implementation (`V_TOKEN_GHO_IMPL`).
+    // 14. Upgrade the GHO VariableDebtToken (`GHO_V_TOKEN`) to its new custom implementation (`V_TOKEN_GHO_IMPL`).
     POOL_CONFIGURATOR.updateVariableDebtToken(
       ConfiguratorInputTypes.UpdateDebtTokenInput({
         asset: AaveV3EthereumAssets.GHO_UNDERLYING,
@@ -203,7 +213,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     );
 
-    // 14. Upgrade the AAVE AToken (`AAVE_A_TOKEN`) to the `ATokenWithDelegation` implementation (`A_TOKEN_WITH_DELEGATION_IMPL`).
+    // 15. Upgrade the AAVE AToken (`AAVE_A_TOKEN`) to the `ATokenWithDelegation` implementation (`A_TOKEN_WITH_DELEGATION_IMPL`).
     POOL_CONFIGURATOR.updateAToken(
       ConfiguratorInputTypes.UpdateATokenInput({
         asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
@@ -214,7 +224,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     );
 
-    // 15. Upgrade the AAVE VariableDebtToken (`AAVE_V_TOKEN`) to the standard `VariableDebtToken` implementation (`V_TOKEN_IMPL`).
+    // 16. Upgrade the AAVE VariableDebtToken (`AAVE_V_TOKEN`) to the standard `VariableDebtToken` implementation (`V_TOKEN_IMPL`).
     POOL_CONFIGURATOR.updateVariableDebtToken(
       ConfiguratorInputTypes.UpdateDebtTokenInput({
         asset: AaveV3EthereumAssets.AAVE_UNDERLYING,
@@ -225,10 +235,10 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     );
 
-    // 16. Enable flash loans for the GHO reserve.
+    // 17. Enable flash loans for the GHO reserve.
     POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
 
-    // 17. The new `GhoDirectMinter` (`FACILITATOR`) mints and supplies any remaining GHO bucket capacity (capacity - level) to the pool.
+    // 18. The new `GhoDirectMinter` (`FACILITATOR`) mints and supplies any remaining GHO bucket capacity (capacity - level) to the pool.
     if (capacityFromOldFacilitator > levelFromOldFacilitator) {
       IGhoDirectMinter(FACILITATOR).mintAndSupply(capacityFromOldFacilitator - levelFromOldFacilitator);
     }
@@ -237,7 +247,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // - GHO reserve's `virtualUnderlyingBalance`: `capacityFromOldFacilitator - levelFromOldFacilitator`.
     // - GHO balance of the `GHO_A_TOKEN` contract: `capacityFromOldFacilitator - levelFromOldFacilitator`.
 
-    // 18. Migrate steward permissions for GHO bucket control.
+    // 19. Migrate steward permissions for GHO bucket control.
     address[] memory vaults = new address[](1);
     vaults[0] = FACILITATOR;
     IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);

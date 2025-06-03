@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {ATokenInstance, IInitializableAToken, Errors} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 
@@ -68,5 +70,10 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     //       The facilitator bucket (both capacity and level) previously associated with this AToken
     //       will be effectively transferred to a new `GhoDirectMinter` contract (which becomes the new facilitator).
     IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).burn(amount);
+  }
+
+  /// @inheritdoc IATokenMainnetInstanceGHO
+  function handleRepayment(address, /* user */ address, /* onBehalfOf */ uint256 amount) external override {
+    IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).transfer(TREASURY, amount);
   }
 }

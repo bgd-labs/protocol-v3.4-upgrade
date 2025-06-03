@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
@@ -8,6 +10,9 @@ import {WadRayMath} from "aave-v3-origin/contracts/protocol/libraries/math/WadRa
 import {DataTypes} from "aave-v3-origin/contracts/protocol/libraries/types/DataTypes.sol";
 import {IATokenWithDelegation} from "aave-v3-origin/contracts/interfaces/IATokenWithDelegation.sol";
 import {IDefaultInterestRateStrategyV2} from "aave-v3-origin/contracts/interfaces/IDefaultInterestRateStrategyV2.sol";
+import {IPriceOracleGetter} from "aave-v3-origin/contracts/interfaces/IPriceOracleGetter.sol";
+
+import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 
 import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
@@ -16,9 +21,87 @@ import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainn
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";
 
-contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
+contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
+  using SafeERC20 for IERC20;
+
+  function setUp() public override {
+    super.setUp();
+
+    GovV3Helpers.executePayload(vm, 295);
+  }
+
+  function test_upgrade_with_gho_deficit() public {
+    uint256 usdtSupplyAmount = 1_000 * 10 ** AaveV3EthereumAssets.USDT_DECIMALS;
+    uint256 ghoBorrowAmount = 2_000 * 10 ** AaveV3EthereumAssets.GHO_DECIMALS;
+
+    address borrower = vm.addr(4);
+    address liquidator = vm.addr(5);
+
+    deal2(AaveV3EthereumAssets.USDT_UNDERLYING, borrower, usdtSupplyAmount);
+
+    address oracle = AaveV3Ethereum.POOL.ADDRESSES_PROVIDER().getPriceOracle();
+    uint256 oldGhoPrice = IPriceOracleGetter(oracle).getAssetPrice(AaveV3EthereumAssets.GHO_UNDERLYING);
+    vm.mockCall(
+      oracle,
+      abi.encodeWithSelector(IPriceOracleGetter.getAssetPrice.selector, AaveV3EthereumAssets.GHO_UNDERLYING),
+      abi.encode(uint256(0))
+    );
+
+    vm.startPrank(borrower);
+
+    IERC20(AaveV3EthereumAssets.USDT_UNDERLYING).forceApprove(address(AaveV3Ethereum.POOL), usdtSupplyAmount);
+
+    AaveV3Ethereum.POOL.supply({
+      asset: AaveV3EthereumAssets.USDT_UNDERLYING,
+      amount: usdtSupplyAmount,
+      onBehalfOf: borrower,
+      referralCode: 0
+    });
+
+    AaveV3Ethereum.POOL.borrow({
+      asset: AaveV3EthereumAssets.GHO_UNDERLYING,
+      amount: ghoBorrowAmount,
+      interestRateMode: 2,
+      referralCode: 0,
+      onBehalfOf: borrower
+    });
+
+    vm.stopPrank();
+
+    vm.mockCall(
+      oracle,
+      abi.encodeWithSelector(IPriceOracleGetter.getAssetPrice.selector, AaveV3EthereumAssets.GHO_UNDERLYING),
+      abi.encode(oldGhoPrice)
+    );
+
+    deal2(AaveV3EthereumAssets.GHO_UNDERLYING, liquidator, ghoBorrowAmount);
+
+    vm.startPrank(liquidator);
+
+    IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).forceApprove(address(AaveV3Ethereum.POOL), ghoBorrowAmount);
+
+    AaveV3Ethereum.POOL.liquidationCall({
+      collateralAsset: AaveV3EthereumAssets.USDT_UNDERLYING,
+      debtAsset: AaveV3EthereumAssets.GHO_UNDERLYING,
+      borrower: borrower,
+      debtToCover: type(uint256).max,
+      receiveAToken: false
+    });
+
+    vm.stopPrank();
+
+    assertNotEq(AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING), 0, "zero deficit for GHO");
+
+    test_upgrade();
+  }
+
+  function test_upgrade_without_gho_deficit() public {
+    assertEq(AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING), 0, "non zero deficit for GHO");
+
+    test_upgrade();
+  }
 
   function test_upgrade() public override {
     UpgradePayloadMainnet _payload = UpgradePayloadMainnet(_getTestPayload());
@@ -88,6 +171,8 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
     assertEq(reserveData.currentLiquidityRate, 0);
     assertEq(reserveData.currentVariableBorrowRate, oldVariableBorrowRate);
 
+    assertEq(AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING), 0);
+
     virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
       >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
     assertEq(virtualAccActiveFlag, 1);
@@ -99,9 +184,6 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
         AaveV3Ethereum.POOL.getReserveNormalizedIncome(AaveV3EthereumAssets.GHO_UNDERLYING)
       );
     assertEq(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
-
-    // milkmath check reading from Etherscan, which also matches what is shown here: https://aave.tokenlogic.xyz/gho-revenue
-    assertApproxEqAbs(reserveData.accruedToTreasury, 2_453_753_496504028593200000, 1_000);
 
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
       reserveData.interestRateStrategyAddress
