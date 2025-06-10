@@ -237,7 +237,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Celo.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Celo.COLLECTOR);
 
-    return _deployL2(deployParams);
+    return _deployL1(deployParams);
   }
 
   struct DeployParameters {
