@@ -60,7 +60,15 @@ import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCusto
 import {PoolConfiguratorWithCustomInitialize} from "../src/PoolConfiguratorWithCustomInitialize.sol";
 
 library DeploymentLibrary {
+  struct DeployParameters {
+    address poolAddressesProvider;
+    address pool;
+    address interestRateStrategy;
+    address rewardsController;
+    address treasury;
+  }
   // rollups
+
   function _deployOptimism() internal returns (address) {
     DeployParameters memory deployParams;
 
@@ -252,14 +260,6 @@ library DeploymentLibrary {
     deployParams.treasury = address(AaveV3Soneium.COLLECTOR);
 
     return _deployL2(deployParams);
-  }
-
-  struct DeployParameters {
-    address poolAddressesProvider;
-    address pool;
-    address interestRateStrategy;
-    address rewardsController;
-    address treasury;
   }
 
   function _deployL2(DeployParameters memory deployParams) internal returns (address) {
