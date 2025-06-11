@@ -10,4 +10,8 @@ library Deployments {
   address public constant AVALANCHE = 0xcD21f2532d3c8AcAACC5217F50d5be4F611bbC12;
   address public constant SONIC = 0xF90c3AB36F17574F2A490e9D98b0B5301332BBFa;
   address public constant METIS = 0xf527fF293EA12320E5246B2668937D0A694EA46D;
+  address public constant BNB = 0xFA6a2793c50fD498ff8d53510d6EFfB66C7A03C4;
+  address public constant CELO = 0x1E2a398AAe0FF798953603f774aC1143EA0ba545;
+  address public constant SCROLL = 0x5914AB024e4D730886ad2f2aF8790C466b0c2868;
+  address public constant LINEA = 0xe3DE4BA75c667b86FC82f4C0Db0aF83Dd9626346;
 }
