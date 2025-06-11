@@ -14,4 +14,5 @@ library Deployments {
   address public constant CELO = 0x1E2a398AAe0FF798953603f774aC1143EA0ba545;
   address public constant SCROLL = 0x5914AB024e4D730886ad2f2aF8790C466b0c2868;
   address public constant LINEA = 0xe3DE4BA75c667b86FC82f4C0Db0aF83Dd9626346;
+  address public constant ZKSYNC = 0xE7dBD6023B9c7eD90f65CE61458B7b4A5c22A1Fa;
 }
