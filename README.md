@@ -79,6 +79,12 @@ This sequence includes the general steps plus specific GHO migration steps, exec
 
 ### Libraries
 
-For non-zksync networks, the following libraries are used:
+For non-zksync(shanghai) networks:
 
 `FOUNDRY_LIBRARIES=src/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x5047AD5e603Ec4a2AB58aaE2321C07D8f4De6a8a,src/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0x6E2aFD57a161d12f34f416c29619BFeAcAC8AA18,src/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0x7fcE69A2bA3e78EeB36798cde2c94C70f3A043af,src/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x4fDB5d360f946CFD25b14F346f748204c0C6a2F4,src/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x5934b283f7120500253f277CCcF4521528aE34D6,src/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0x564c42578A1b270EaE16c25Da39d901245881d1F,src/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x1eF34B91afC368174F579067D1DB94325cDC7946`
+
+For linea(london):
+
+`FOUNDRY_LIBRARIES=src/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x24B58926d2Dd490238C6366dc7b36357caBd71b9,src/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0xD379a9e4A925916cF69c16C34409F401a28d5A52,src/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0x23Bde27B7be7C2Eb741c3BcEF95384AAEc4f084c,src/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x001b936869b535B4AF6F77a9be033801B39fcfa6,src/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0xED56ED0316FECBF93E3F5cA5aE70b8eF48ad4535,src/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0xca1610aE2820d34EB717b43e3CB1dd33B7eC05FB,src/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x8bd15bbd01e987D4b851818b6586AA6E16E65c62`
+
+For zksync:
