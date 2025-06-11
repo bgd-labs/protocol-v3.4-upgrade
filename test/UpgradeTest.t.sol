@@ -12,7 +12,7 @@ import {
   DataTypes,
   ReserveConfiguration,
   SafeERC20
-} from "../src/aave-helpers/ProtocolV3TestBase.sol";
+} from "aave-helpers/src/ProtocolV3TestBase.sol";
 
 import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interfaces/IFlashLoanReceiver.sol";
 
@@ -189,7 +189,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     uint256[] calldata premiums,
     address, /* initiator */
     bytes calldata /* params */
-  ) external returns (bool) {
+  ) external override(IFlashLoanReceiver, ProtocolV3TestBase) returns (bool) {
     for (uint256 i = 0; i < assets.length; i++) {
       deal2(assets[i], address(this), amounts[i] + premiums[i]);
 
