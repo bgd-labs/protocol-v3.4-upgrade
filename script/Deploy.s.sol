@@ -247,7 +247,7 @@ library DeploymentLibrary {
 
     deployParams.pool = address(AaveV3Soneium.POOL);
     deployParams.poolAddressesProvider = address(AaveV3Soneium.POOL_ADDRESSES_PROVIDER);
-    deployParams.interestRateStrategy = address(AaveV3SoneiumAssets.CELO_INTEREST_RATE_STRATEGY);
+    deployParams.interestRateStrategy = address(AaveV3SoneiumAssets.USDT_INTEREST_RATE_STRATEGY);
     deployParams.rewardsController = AaveV3Soneium.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Soneium.COLLECTOR);
 
