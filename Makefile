@@ -30,4 +30,4 @@ deploy-lido :; FOUNDRY_PROFILE=mainnet forge script script/Deploy.s.sol:Deployli
 deploy-etherfi :; FOUNDRY_PROFILE=mainnet forge script script/Deploy.s.sol:Deployetherfi --rpc-url mainnet --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify
 
 
-deploy-zk :; FOUNDRY_PROFILE=zksync forge script zksync/scripts/Deploy.s.sol:Deployzksync --zksync --rpc-url zksync --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --verify --slow --broadcast
+deploy-zk :; FOUNDRY_PROFILE=zksync forge script zksync/scripts/Deploy.s.sol:Deployzksync --zksync --rpc-url zksync --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --verify --slow --broadcast --resume --verifier etherscan

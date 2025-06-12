@@ -27,6 +27,7 @@ for (const file of filteredFiles) {
   const contentAfter = JSON.parse(
     readFileSync(`${directoryPath}/${file}`, { encoding: "utf8" }),
   );
+
   // diff slots that are not pure implementation slots (e.g. things on addresses provider)
   execSync(
     `npx @bgd-labs/cli@latest codeDiff --address1 ${contentBefore.poolConfig.protocolDataProvider} --chainId1 ${contentBefore.chainId} --address2 ${contentAfter.poolConfig.protocolDataProvider} --chainId2 ${contentAfter.chainId} -o file`,
