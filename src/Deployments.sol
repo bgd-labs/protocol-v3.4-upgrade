@@ -15,4 +15,7 @@ library Deployments {
   address public constant SCROLL = 0x5914AB024e4D730886ad2f2aF8790C466b0c2868;
   address public constant LINEA = 0xe3DE4BA75c667b86FC82f4C0Db0aF83Dd9626346;
   address public constant ZKSYNC = 0xE7dBD6023B9c7eD90f65CE61458B7b4A5c22A1Fa;
+  address public constant MAINNET_CORE = 0xC2584B9cA7759FE1ac48D8aE38aeAFE12dbC9876;
+  address public constant MAINNET_LIDO = 0x028229cdAADa074A17980B4d69A1483a738D24cA;
+  address public constant MAINNET_ETHERFI = 0x1FaaB253f2cb5462eac72BCE7a379D3fc5A17E10;
 }

@@ -25,5 +25,8 @@ git-diff :
 		END { if (in_diff_block && skip_block == 0) { printf "%s", buffer } }' > diffs/${out}.diff
 #  --resume --verify --etherscan-api-key ${ETHERSCAN_API_KEY_ARBITRUM}
 deploy :; FOUNDRY_PROFILE=${chain} forge script script/Deploy.s.sol:Deploy${chain} --rpc-url ${chain} --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify
+deploy-lido :; FOUNDRY_PROFILE=mainnet forge script script/Deploy.s.sol:Deploylido --rpc-url mainnet --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify
+deploy-etherfi :; FOUNDRY_PROFILE=mainnet forge script script/Deploy.s.sol:Deployetherfi --rpc-url mainnet --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify
+
 
 deploy-zk :; FOUNDRY_PROFILE=zksync forge script zksync/scripts/Deploy.s.sol:Deployzksync --zksync --rpc-url zksync --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --verify --slow --broadcast

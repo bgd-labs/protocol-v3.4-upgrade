@@ -33,8 +33,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
   IPool public override POOL;
   IPoolAddressesProvider public override ADDRESSES_PROVIDER;
 
-  UpgradePayload private _payloadForFlashloan;
-
   constructor(string memory network, uint256 blocknumber) {
     NETWORK = network;
     BLOCK_NUMBER = blocknumber;
@@ -42,9 +40,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
-    if (block.chainid == 1) {
-      GovV3Helpers.executePayload(vm, 295);
-    }
   }
 
   function test_execution() public virtual {
@@ -128,10 +123,10 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
   }
 
   function test_flashloan_attack() public {
-    _payloadForFlashloan = UpgradePayload(_getTestPayload());
+    UpgradePayload payloadForFlashloan = UpgradePayload(_getTestPayload());
 
-    POOL = _payloadForFlashloan.POOL();
-    ADDRESSES_PROVIDER = _payloadForFlashloan.POOL_ADDRESSES_PROVIDER();
+    POOL = payloadForFlashloan.POOL();
+    ADDRESSES_PROVIDER = payloadForFlashloan.POOL_ADDRESSES_PROVIDER();
 
     address[] memory reserves = POOL.getReservesList();
     uint256[] memory oldVirtualUnderlyingBalances = new uint256[](reserves.length);
@@ -196,7 +191,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       IERC20(assets[i]).forceApprove(msg.sender, amounts[i] + premiums[i]);
     }
 
-    executePayload(vm, address(_payloadForFlashloan));
+    executePayload(vm, address(_getTestPayload()));
 
     return true;
   }
