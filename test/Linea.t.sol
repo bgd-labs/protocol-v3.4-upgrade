@@ -6,7 +6,11 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 import {Deployments} from "../src/Deployments.sol";
 
-contract LineaTest is UpgradeTest("linea", 22686946) {
+/**
+ * @dev Test contract for Linea network needs to be run via:
+ * FORGE_PROFIE=linea forge test --mc LineaTest
+ */
+contract LineaTest is UpgradeTest("linea", 19928377) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployLinea();
   }

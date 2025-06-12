@@ -84,6 +84,7 @@ celo = "${RPC_CELO}"
 zksync = "${RPC_ZKSYNC}"
 linea = "${RPC_LINEA}"
 sonic = "${RPC_SONIC}"
+soneium = "${RPC_SONEIUM}"
 
 [fmt]
 tab_width = 2
