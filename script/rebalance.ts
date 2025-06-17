@@ -115,6 +115,14 @@ const bSet = new Set(initialCache.records[AaveV3Ethereum.ASSETS.GHO.V_TOKEN]);
 const intersection = initialCache.records[AaveSafetyModule.STK_AAVE].filter(
   (value) => bSet.has(value),
 );
+console.log(
+  `StkAave users`,
+  initialCache.records[AaveSafetyModule.STK_AAVE].length,
+);
+console.log(
+  `VGHO users`,
+  initialCache.records[AaveV3Ethereum.ASSETS.GHO.V_TOKEN].length,
+);
 console.log(`Total Intersection: ${intersection.length}`);
 initialCache.intersection = intersection;
 
