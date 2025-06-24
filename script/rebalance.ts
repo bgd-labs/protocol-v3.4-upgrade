@@ -3,9 +3,11 @@ import { AaveV3Ethereum } from "@bgd-labs/aave-address-book";
 import { genericIndexer, getClient, IERC20_ABI } from "@bgd-labs/toolbox";
 import {
   type Address,
+  createPublicClient,
   encodeFunctionData,
   getAbiItem,
   getAddress,
+  http,
   type Log,
 } from "viem";
 import { writeFileSync } from "node:fs";
@@ -14,11 +16,19 @@ import PQueue from "p-queue";
 import initialCache from "../rebalance-cache.json";
 import { vGHO_ABI } from "./vGHOAbi";
 import { multiCall_ABI } from "./multicallAbi";
+import { mainnet } from "viem/chains";
 
-const mainnetClient = getClient(1, {
-  providerConfig: { alchemyKey: process.env.ALCHEMY_API_KEY },
-  httpConfig: { batch: true },
-  clientConfig: { batch: { multicall: true } },
+// const mainnetClient = getClient(1, {
+//   providerConfig: { alchemyKey: process.env.ALCHEMY_API_KEY },
+//   httpConfig: { batch: true },
+//   clientConfig: { batch: { multicall: true } },
+// });
+
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http(
+    `https://mainnet.gateway.tenderly.co/${process.env.TENDERLY_MULTICHAIN_KEY}`,
+  ),
 });
 // const mainnetClient = createPublicClient({
 //   chain: ChainList[Number(1) as keyof typeof ChainList],
@@ -128,7 +138,8 @@ initialCache.intersection = intersection;
 
 writeFileSync("rebalance-cache.json", JSON.stringify(initialCache), "utf8");
 
-const indexSnapshot = 1132881766376823496207707555n;
+// https://etherscan.io/address/0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2#readProxyContract#F26 //0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f
+const indexSnapshot = 1136325166523935507223355724n;
 
 const finalUsers: Address[] = [];
 for (const user of intersection) {
@@ -148,7 +159,7 @@ for (const user of intersection) {
     functionName: "balanceOf",
     args: [user as Address],
   });
-  if (balance <= BigInt(1e18)) {
+  if (balance == 0n /*<= BigInt(1e18)*/) {
     console.log(`skipping ${user} as position too small`);
     continue;
   }

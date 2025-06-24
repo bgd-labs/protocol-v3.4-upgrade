@@ -12,7 +12,7 @@ import {
   DataTypes,
   ReserveConfiguration,
   SafeERC20
-} from "../src/aave-helpers/ProtocolV3TestBase.sol";
+} from "aave-helpers/src/ProtocolV3TestBase.sol";
 
 import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interfaces/IFlashLoanReceiver.sol";
 
@@ -22,32 +22,58 @@ interface NewPool {
   function RESERVE_INTEREST_RATE_STRATEGY() external returns (address);
 }
 
-abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
+interface MockExecute {
+  function execute() external;
+}
+
+contract MockFlashReceiver {
+  using SafeERC20 for IERC20;
+
+  function executeOperation(
+    address[] calldata assets,
+    uint256[] calldata amounts,
+    uint256[] calldata premiums,
+    address initiator, /* initiator */
+    bytes calldata /* params */
+  ) external returns (bool) {
+    for (uint256 i = 0; i < assets.length; i++) {
+      IERC20(assets[i]).forceApprove(msg.sender, amounts[i] + premiums[i]);
+    }
+
+    MockExecute(initiator).execute();
+
+    return true;
+  }
+}
+
+abstract contract UpgradeTest is ProtocolV3TestBase {
   using SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   string public NETWORK;
   string public NETWORK_SUB_NAME;
   uint256 public immutable BLOCK_NUMBER;
+  address immutable FLASH_RECEIVER;
 
-  IPool public override POOL;
-  IPoolAddressesProvider public override ADDRESSES_PROVIDER;
-
-  UpgradePayload private _payloadForFlashloan;
+  IPool public POOL;
+  IPoolAddressesProvider public ADDRESSES_PROVIDER;
 
   constructor(string memory network, uint256 blocknumber) {
     NETWORK = network;
     BLOCK_NUMBER = blocknumber;
+    FLASH_RECEIVER = address(new MockFlashReceiver());
   }
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
-    if (block.chainid == 1) {
-      GovV3Helpers.executePayload(vm, 295);
-    }
   }
 
   function test_execution() public virtual {
+    executePayload(vm, _getTestPayload());
+  }
+
+  // function to be called from the flashloan
+  function execute() external {
     executePayload(vm, _getTestPayload());
   }
 
@@ -85,6 +111,17 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     }
   }
 
+  function test_assumption_unbacked() external {
+    UpgradePayload _payload = UpgradePayload(_getTestPayload());
+    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
+    IPool pool = IPool(addressesProvider.getPool());
+    address[] memory reserves = pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserves[i]);
+      assertEq(reserveData.unbacked, 0);
+    }
+  }
+
   function test_upgrade() public virtual {
     UpgradePayload _payload = UpgradePayload(_getTestPayload());
 
@@ -103,7 +140,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       address aToken = pool.getReserveAToken(reserve);
 
       assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
-
       DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserve);
 
       uint256 virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
@@ -118,10 +154,10 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
   }
 
   function test_flashloan_attack() public {
-    _payloadForFlashloan = UpgradePayload(_getTestPayload());
+    UpgradePayload payloadForFlashloan = UpgradePayload(_getTestPayload());
 
-    POOL = _payloadForFlashloan.POOL();
-    ADDRESSES_PROVIDER = _payloadForFlashloan.POOL_ADDRESSES_PROVIDER();
+    POOL = payloadForFlashloan.POOL();
+    ADDRESSES_PROVIDER = payloadForFlashloan.POOL_ADDRESSES_PROVIDER();
 
     address[] memory reserves = POOL.getReservesList();
     uint256[] memory oldVirtualUnderlyingBalances = new uint256[](reserves.length);
@@ -159,7 +195,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     // Using bytes("") to expect a revert without a reason string (an "empty" error, like EvmError: Revert).
     vm.expectRevert(bytes(""));
     POOL.flashLoan({
-      receiverAddress: address(this),
+      receiverAddress: FLASH_RECEIVER,
       assets: filteredReserves,
       amounts: amounts,
       interestRateModes: interestRateModes,
@@ -171,24 +207,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     for (uint256 i = 0; i < reserves.length; i++) {
       assertEq(POOL.getVirtualUnderlyingBalance(reserves[i]), oldVirtualUnderlyingBalances[i]);
     }
-  }
-
-  function executeOperation(
-    address[] calldata assets,
-    uint256[] calldata amounts,
-    uint256[] calldata premiums,
-    address, /* initiator */
-    bytes calldata /* params */
-  ) external returns (bool) {
-    for (uint256 i = 0; i < assets.length; i++) {
-      deal2(assets[i], address(this), amounts[i] + premiums[i]);
-
-      IERC20(assets[i]).forceApprove(msg.sender, amounts[i] + premiums[i]);
-    }
-
-    executePayload(vm, address(_payloadForFlashloan));
-
-    return true;
   }
 
   function _getTestPayload() internal returns (address) {
